@@ -33,4 +33,13 @@ public class UserController {
                 request.getName(),
                 request.getUsertype()));
     }
+
+    @PostMapping("/login")
+    public AjaxResult<LoginResponse> login(@Valid @RequestBody RegisterRequest request,
+                                              HttpSession session,
+                                              HttpServletResponse response) {
+        log.info("Try login: "+request.getUsername());
+        return AjaxResult.success(userService.login(request.getUsername(),
+                request.getPassword()));
+    }
 }
