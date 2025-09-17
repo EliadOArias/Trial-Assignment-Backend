@@ -19,7 +19,7 @@ public class JwtConfig {
     private long refreshLimit;
 
     public void setBaseKey(String baseKey) {
-        key = Keys.hmacShaKeyFor(baseKey.getBytes(StandardCharsets.UTF_8));
+        this.setKey(Keys.hmacShaKeyFor(baseKey.getBytes(StandardCharsets.UTF_8)));
         this.baseKey = baseKey;
     }
     public SecretKey getKey() {
