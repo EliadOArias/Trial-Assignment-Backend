@@ -8,9 +8,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class LoginResponse {
-    @JsonProperty("access-token")
-    private String accessToken;
-    @JsonProperty("refresh-token")
-    private String refreshToken;
+public class UserInfo {
+    private String username;
+    private String name;
+    @JsonProperty("user_id")
+    private String userId;
+    private Integer usertype;
 }

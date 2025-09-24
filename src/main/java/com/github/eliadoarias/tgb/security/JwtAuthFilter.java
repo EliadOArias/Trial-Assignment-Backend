@@ -1,7 +1,6 @@
-package com.github.eliadoarias.tgb.handler;
+package com.github.eliadoarias.tgb.security;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.github.eliadoarias.tgb.config.SecurityConfig;
 import com.github.eliadoarias.tgb.entity.User;
 import com.github.eliadoarias.tgb.mapper.UserMapper;
 import com.github.eliadoarias.tgb.util.JwtReader;
@@ -12,8 +11,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -22,7 +21,7 @@ import java.util.Arrays;
 
 @Component
 @Slf4j
-public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
+public class JwtAuthFilter extends OncePerRequestFilter {
     @Resource
     private UserMapper userMapper;
     @Resource
@@ -47,5 +46,12 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         QueryWrapper<User> wrapper = new QueryWrapper<User>();
         wrapper.eq("user_id", userId);
         User user = userMapper.selectOne(wrapper);
+        request.setAttribute("user", user);
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new TestingAuthenticationToken("username", "password", "ROLE_USER")
+        );
+        log.info("通过："+request.getRequestURI());
+        filterChain.doFilter(request, response);
     }
 }

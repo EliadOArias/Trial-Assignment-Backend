@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.eliadoarias.tgb.constant.ExceptionEnum;
 import com.github.eliadoarias.tgb.dto.LoginResponse;
+import com.github.eliadoarias.tgb.dto.UserInfo;
 import com.github.eliadoarias.tgb.entity.User;
 import com.github.eliadoarias.tgb.exception.ApiException;
 import com.github.eliadoarias.tgb.result.AjaxResult;
@@ -38,6 +39,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Resource
     PasswordEncoder encoder;
+
+    @Resource
+    UserMapper userMapper;
 
     private final AuthenticationManager authenticationManager;
 
@@ -81,6 +85,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         String accessToken = jwtUtil.generateAccessToken(userId);
         String refreshToken = jwtUtil.generateRefreshToken(userId, 60 * 60 * 1000);
         return new LoginResponse(accessToken,refreshToken);
+    }
+
+    @Override
+    public UserInfo viewMe(User user) {
+        return new UserInfo(user.getUsername(), user.getName(), user.getUserId(), user.getUsertype());
     }
 }
 
