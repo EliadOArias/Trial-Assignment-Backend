@@ -56,7 +56,7 @@ public class LoginSuccessHandler extends AbstractAuthenticationTargetUrlRequestH
                 jwtUtil.generateAccessToken(loginUser.getUserId()),
                 jwtUtil.generateRefreshToken(loginUser.getUserId(), 60 * 60 * 1000)
         );
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setContentType("application/json;charset=UTF-8");
         PrintWriter out = response.getWriter();
         out.print(new ObjectMapper().writeValueAsString(AjaxResult.success(loginResponse)));
         out.flush();

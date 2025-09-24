@@ -8,6 +8,7 @@ import com.github.eliadoarias.tgb.security.LoginUser;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,10 +32,10 @@ public class UsernameAuthenticationProvider implements AuthenticationProvider {
         String password = authentication.getCredentials().toString();
         UserDetails user = userDetailsService.loadUserByUsername(username);
         if (username == null || password == null) {
-            throw new ApiException(ExceptionEnum.LOGIN_ERROR);
+            throw new BadCredentialsException(ExceptionEnum.LOGIN_ERROR.getMessage());
         }
         else if(!passwordEncoder.matches(password, user.getPassword())) {
-            throw new ApiException(ExceptionEnum.LOGIN_ERROR);
+            throw new BadCredentialsException(ExceptionEnum.LOGIN_ERROR.getMessage());
         }
         log.info("Login Success:{}",username);
 

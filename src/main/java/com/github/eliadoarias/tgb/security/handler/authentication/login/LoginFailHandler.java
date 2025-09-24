@@ -19,7 +19,7 @@ public class LoginFailHandler implements AuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
         String errorMsg = exception.getMessage();
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setContentType("application/json;charset=UTF-8");
         PrintWriter out = response.getWriter();
         AjaxResult<Object> responseData = AjaxResult.error(ExceptionEnum.LOGIN_ERROR);
         out.write(new ObjectMapper().writeValueAsString(responseData));
