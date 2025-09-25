@@ -32,10 +32,10 @@ public class UsernameAuthenticationProvider implements AuthenticationProvider {
         String password = authentication.getCredentials().toString();
         UserDetails user = userDetailsService.loadUserByUsername(username);
         if (username == null || password == null) {
-            throw new BadCredentialsException(ExceptionEnum.LOGIN_ERROR.getMessage());
+            throw new ApiException(ExceptionEnum.INVALID_PARAMETERS);
         }
         else if(!passwordEncoder.matches(password, user.getPassword())) {
-            throw new BadCredentialsException(ExceptionEnum.LOGIN_ERROR.getMessage());
+            throw new ApiException(ExceptionEnum.LOGIN_ERROR);
         }
         log.info("Login Success:{}",username);
 

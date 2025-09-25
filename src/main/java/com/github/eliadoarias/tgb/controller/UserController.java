@@ -43,7 +43,7 @@ public class UserController {
         return null;
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAuthority('permission:user.read')")
     @GetMapping("/me")
     public AjaxResult<UserInfo> viewMe(@RequestAttribute User user) {
         log.info("View user info: "+user);

@@ -9,7 +9,9 @@ import org.springframework.http.HttpStatus;
 public enum ExceptionEnum {
     SERVER_ERROR(500, "服务器错误"),
     NOT_FOUND(404, "Not Found"),
-    WRONG_TOKEN(2001, "Wrong Token"),
+    WRONG_TOKEN(2200, "Wrong Token"),
+    UNAUTHENTICATED(2001, "认证失败"),
+    UNAUTHORIZED(2002, "无权访问"),
     LOGIN_ERROR(2401, "账号或密码错误"),
     REGISTER_DUPLICATED(2402, "账号已存在"),
     USER_EXP(2100, "token已过期"),

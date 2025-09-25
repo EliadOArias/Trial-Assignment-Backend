@@ -7,6 +7,7 @@ import com.github.eliadoarias.tgb.util.ExceptionUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.ServletRequestBindingException;
@@ -47,5 +48,14 @@ public class ValidateExceptionHandler {
     public AjaxResult<Object> handleExpiredJwtException(Exception e) {
         ExceptionUtil.printError(e);
         return AjaxResult.error(ExceptionEnum.USER_EXP);
+    }
+
+    @ExceptionHandler({
+            AuthorizationDeniedException.class
+    })
+    @ResponseBody
+    public AjaxResult<Object> handleAuthorizationDeniedException(Exception e) {
+        ExceptionUtil.printError(e);
+        return AjaxResult.error(ExceptionEnum.UNAUTHORIZED);
     }
 }
