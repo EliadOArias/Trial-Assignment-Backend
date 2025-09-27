@@ -112,6 +112,16 @@ public class SecurityConfig {
         return http.build();
     }
 
+    @Bean
+    @Order(10)
+    public SecurityFilterChain ResourceFilterChain(HttpSecurity http) throws Exception {
+        doCommon(http);
+        http.securityMatcher("/resources/**")
+                .authorizeHttpRequests(authz -> authz
+                        .anyRequest().permitAll());
+        return http.build();
+    }
+
     private void doCommon(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .csrf(csrf -> csrf.disable())

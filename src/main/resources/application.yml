@@ -2,6 +2,10 @@ logging:
   level:
     org.springframework.security: DEBUG
 spring:
+  servlet:
+    multipart:
+      max-file-size: 1GB
+      max-request-size: 100MB
   application:
     name: springDemo
   datasource:
@@ -19,3 +23,5 @@ jwt:
   expiration-time: ${JWT_EXP_TIME}
   refresh-time: ${JWT_REF_TIME}
   refresh-limit: ${JWT_REF_LIMIT}
+mypath:
+  root-path: ${MY_ROOT_PATH}
