@@ -9,4 +9,5 @@ import org.springframework.stereotype.Component;
 @Component
 public class PathConfig {
     private String rootPath;
+    private String rootUrl;
 }

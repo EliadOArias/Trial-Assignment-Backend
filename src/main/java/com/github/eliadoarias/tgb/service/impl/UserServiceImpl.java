@@ -3,23 +3,20 @@ package com.github.eliadoarias.tgb.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.eliadoarias.tgb.constant.ExceptionEnum;
-import com.github.eliadoarias.tgb.dto.LoginResponse;
+import com.github.eliadoarias.tgb.dto.TokenInfo;
 import com.github.eliadoarias.tgb.dto.UserInfo;
 import com.github.eliadoarias.tgb.entity.User;
 import com.github.eliadoarias.tgb.exception.ApiException;
-import com.github.eliadoarias.tgb.result.AjaxResult;
+import com.github.eliadoarias.tgb.mapper.UserMapper;
 import com.github.eliadoarias.tgb.security.LoginUser;
 import com.github.eliadoarias.tgb.service.UserService;
-import com.github.eliadoarias.tgb.mapper.UserMapper;
 import com.github.eliadoarias.tgb.util.JwtUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -50,7 +47,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public LoginResponse register(String username, String password, String name, Integer usertype) {
+    public TokenInfo register(String username, String password, String name, Integer usertype) {
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>();
         queryWrapper.eq(User::getUsername, username);
         User user = baseMapper.selectOne(queryWrapper);
@@ -68,11 +65,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         baseMapper.insert(newUser);
         String accessToken = jwtUtil.generateAccessToken(userId);
         String refreshToken = jwtUtil.generateRefreshToken(userId, 60 * 60 * 1000);
-        return new LoginResponse(accessToken,refreshToken);
+        return new TokenInfo(accessToken,refreshToken);
     }
 
     @Override
-    public LoginResponse login(String username, String password) {
+    public TokenInfo login(String username, String password) {
         //封装
         UsernamePasswordAuthenticationToken auToken = new UsernamePasswordAuthenticationToken(username, password);
         //授权校验
@@ -84,7 +81,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         String userId = loginUser.getUser().getUserId();
         String accessToken = jwtUtil.generateAccessToken(userId);
         String refreshToken = jwtUtil.generateRefreshToken(userId, 60 * 60 * 1000);
-        return new LoginResponse(accessToken,refreshToken);
+        return new TokenInfo(accessToken,refreshToken);
     }
 
     @Override

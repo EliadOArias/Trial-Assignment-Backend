@@ -2,8 +2,7 @@ package com.github.eliadoarias.tgb.security.handler.authentication.login;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.eliadoarias.tgb.constant.ExceptionEnum;
-import com.github.eliadoarias.tgb.dto.LoginResponse;
-import com.github.eliadoarias.tgb.dto.UserInfo;
+import com.github.eliadoarias.tgb.dto.TokenInfo;
 import com.github.eliadoarias.tgb.exception.ApiException;
 import com.github.eliadoarias.tgb.result.AjaxResult;
 import com.github.eliadoarias.tgb.security.LoginUser;
@@ -14,7 +13,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.AbstractAuthenticationTargetUrlRequestHandler;
@@ -52,13 +50,13 @@ public class LoginSuccessHandler extends AbstractAuthenticationTargetUrlRequestH
         if(principal == null)
             throw new ApiException(ExceptionEnum.LOGIN_ERROR);
         LoginUser loginUser = (LoginUser) principal;
-        LoginResponse loginResponse = new LoginResponse(
+        TokenInfo tokenInfo = new TokenInfo(
                 jwtUtil.generateAccessToken(loginUser.getUserId()),
                 jwtUtil.generateRefreshToken(loginUser.getUserId(), 60 * 60 * 1000)
         );
         response.setContentType("application/json;charset=UTF-8");
         PrintWriter out = response.getWriter();
-        out.print(new ObjectMapper().writeValueAsString(AjaxResult.success(loginResponse)));
+        out.print(new ObjectMapper().writeValueAsString(AjaxResult.success(tokenInfo)));
         out.flush();
         out.close();
         log.info("Passed user in filter: {}", loginUser.getUsername());

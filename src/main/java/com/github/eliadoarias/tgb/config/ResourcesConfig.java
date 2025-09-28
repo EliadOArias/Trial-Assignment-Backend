@@ -1,7 +1,6 @@
 package com.github.eliadoarias.tgb.config;
 
 
-import com.github.eliadoarias.tgb.service.ImageService;
 import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;

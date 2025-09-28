@@ -1,29 +1,22 @@
 package com.github.eliadoarias.tgb.security.handler.authentication.api;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.github.eliadoarias.tgb.constant.ExceptionEnum;
 import com.github.eliadoarias.tgb.entity.User;
-import com.github.eliadoarias.tgb.exception.ApiException;
 import com.github.eliadoarias.tgb.mapper.UserMapper;
 import com.github.eliadoarias.tgb.security.LoginUser;
 import com.github.eliadoarias.tgb.security.SecurityConfig;
-import com.github.eliadoarias.tgb.util.ExceptionUtil;
 import com.github.eliadoarias.tgb.util.JwtReader;
 import com.github.eliadoarias.tgb.util.JwtUtil;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.annotation.Resource;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -61,6 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         QueryWrapper<User> wrapper = new QueryWrapper<User>();
         wrapper.eq("user_id", userId);
         User user = userMapper.selectOne(wrapper);
+        request.setAttribute("user_id", user.getUserId());
         request.setAttribute("user", user);
         LoginUser loginUser = new LoginUser(user);
 

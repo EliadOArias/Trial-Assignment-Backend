@@ -10,7 +10,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -26,6 +25,7 @@ public class LoginUser implements UserDetails {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
         if ((ROLE_USER & user.getUsertype()) != 0){
             authorities.add(new SimpleGrantedAuthority("permission:user.read"));
+            authorities.add(new SimpleGrantedAuthority("permission:user.upload"));
         }
         return authorities;
     }

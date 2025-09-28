@@ -2,13 +2,11 @@ package com.github.eliadoarias.tgb.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.github.eliadoarias.tgb.constant.ExceptionEnum;
+import com.github.eliadoarias.tgb.config.PathConfig;
 import com.github.eliadoarias.tgb.dto.FileInfo;
 import com.github.eliadoarias.tgb.entity.Image;
-import com.github.eliadoarias.tgb.exception.ApiException;
 import com.github.eliadoarias.tgb.mapper.ImageMapper;
 import com.github.eliadoarias.tgb.service.ImageService;
-import com.github.eliadoarias.tgb.util.ExceptionUtil;
 import com.github.eliadoarias.tgb.util.ImageStorageUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -18,13 +16,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
-import java.nio.file.Files;
-import java.security.MessageDigest;
 
 @Service
 @Slf4j
 public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements ImageService {
+    @Resource
+    private PathConfig pathConfig;
     @Resource
     ImageStorageUtil imageStorageUtil;
     @Override
@@ -37,11 +34,11 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
 
         if (image != null) {
             log.info("重复图片！返回旧图片url");
-            return new FileInfo(image.getImageUrl());
+            return new FileInfo(imageStorageUtil.buildUrl(image.getImageUrl()));
         } else {
             File newFile = imageStorageUtil.saveImage(file);
             String newName = newFile.getName();
-            String url = ImageStorageUtil.IMAGE_FOLDER + newName;
+            String url = imageStorageUtil.buildUrl(ImageStorageUtil.IMAGE_FOLDER + newName);
 
             baseMapper.insert(Image.builder()
                     .imageUrl(url)

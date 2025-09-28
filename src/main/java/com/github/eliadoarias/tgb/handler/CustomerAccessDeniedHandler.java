@@ -1,10 +1,8 @@
 package com.github.eliadoarias.tgb.handler;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.eliadoarias.tgb.constant.ExceptionEnum;
 import com.github.eliadoarias.tgb.result.AjaxResult;
-import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;

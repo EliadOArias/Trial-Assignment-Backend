@@ -25,3 +25,4 @@ jwt:
   refresh-limit: ${JWT_REF_LIMIT}
 mypath:
   root-path: ${MY_ROOT_PATH}
+  root-url: ${MY_ROOT_URL}

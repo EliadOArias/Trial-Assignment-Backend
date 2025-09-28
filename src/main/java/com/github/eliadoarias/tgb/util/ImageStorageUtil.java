@@ -2,7 +2,6 @@ package com.github.eliadoarias.tgb.util;
 
 import com.github.eliadoarias.tgb.config.PathConfig;
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,7 +13,7 @@ import java.util.UUID;
 public class ImageStorageUtil {
     @Resource
     PathConfig pathConfig;
-    public final static String IMAGE_FOLDER = "image/";
+    public final static String IMAGE_FOLDER = "resources/image/";
 
     public String getImageFolderPath(){
         String path = pathConfig.getRootPath()+IMAGE_FOLDER;
@@ -25,12 +24,8 @@ public class ImageStorageUtil {
         return path;
     }
 
-    public String getBaseUrl(HttpServletRequest request){
-        return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath()+"/";
-    }
-
-    public String getImageFolderUrl(HttpServletRequest request){
-        return "image/";
+    public String buildUrl(String url) {
+        return pathConfig.getRootUrl() + url;
     }
 
     public File saveImage(MultipartFile file) throws IOException {

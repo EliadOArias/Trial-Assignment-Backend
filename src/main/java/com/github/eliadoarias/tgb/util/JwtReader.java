@@ -1,7 +1,10 @@
 package com.github.eliadoarias.tgb.util;
 
 import com.github.eliadoarias.tgb.config.JwtConfig;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

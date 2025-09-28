@@ -8,7 +8,6 @@ import com.github.eliadoarias.tgb.security.handler.authentication.login.username
 import com.github.eliadoarias.tgb.security.handler.authentication.login.username.UsernameAuthenticationProvider;
 import com.github.eliadoarias.tgb.security.handler.exception.ExceptionHandlerFilter;
 import jakarta.annotation.Resource;
-import org.apache.catalina.filters.CorsFilter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;

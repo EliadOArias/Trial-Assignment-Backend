@@ -2,13 +2,11 @@ package com.github.eliadoarias.tgb.security.handler.authentication.login.usernam
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.eliadoarias.tgb.constant.ExceptionEnum;
-import com.github.eliadoarias.tgb.dto.UserInfo;
 import com.github.eliadoarias.tgb.exception.ApiException;
 import com.github.eliadoarias.tgb.security.LoginUser;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
