@@ -2,10 +2,9 @@ package com.github.eliadoarias.tgb.controller;
 
 import com.github.eliadoarias.tgb.config.JwtConfig;
 import com.github.eliadoarias.tgb.dto.LoginRequest;
-import com.github.eliadoarias.tgb.dto.TokenInfo;
 import com.github.eliadoarias.tgb.dto.RegisterRequest;
+import com.github.eliadoarias.tgb.dto.TokenInfo;
 import com.github.eliadoarias.tgb.dto.UserInfo;
-import com.github.eliadoarias.tgb.entity.User;
 import com.github.eliadoarias.tgb.result.AjaxResult;
 import com.github.eliadoarias.tgb.service.UserService;
 import jakarta.annotation.Resource;
