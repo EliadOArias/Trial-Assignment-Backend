@@ -2,6 +2,7 @@ package com.github.eliadoarias.tgb.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.github.eliadoarias.tgb.entity.Confession;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -67,4 +68,18 @@ public class PostInfo {
     @JsonProperty("update_at")
     @JsonFormat( pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateAt;
+
+    public static PostInfo of(Confession confession){
+        return builder()
+                .id(confession.getId())
+                .title(confession.getTitle())
+                .content(confession.getContent())
+                .photos(List.of(confession.getPhotos().split(",")))
+                .posterUserId(confession.getPosterId())
+                .views(confession.getViews())
+                .likes(confession.getLikes())
+                .createAt(LocalDateTime.now())
+                .updateAt(LocalDateTime.now())
+                .build();
+    }
 }

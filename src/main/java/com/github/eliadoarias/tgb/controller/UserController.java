@@ -65,8 +65,20 @@ public class UserController {
     @PreAuthorize("hasAuthority('permission:user.read')")
     @GetMapping("/me")
     public AjaxResult<UserInfo> viewMe(HttpServletRequest request) {
-        User user = (User) request.getAttribute("user");
-        log.info("View user info: "+user);
-        return AjaxResult.success(userService.viewMe(user));
+        String userId = request.getAttribute("user_id").toString();
+        return AjaxResult.success(userService.view(userId));
     }
+
+    /**
+     * 查看用户信息
+     * @param username 用户名
+     * @return data为对方的用户信息
+     */
+    @PreAuthorize("hasAuthority('permission:user.read')")
+    @GetMapping("/{username}")
+    public AjaxResult<UserInfo> view(@PathVariable("username") String username) {
+        return AjaxResult.success(userService.viewByName(username));
+    }
+
+
 }

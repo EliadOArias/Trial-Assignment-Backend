@@ -13,5 +13,6 @@ import com.github.eliadoarias.tgb.entity.User;
 public interface UserService extends IService<User> {
     TokenInfo register(String username, String password, String name, Integer usertype);
     TokenInfo login(String username, String password);
-    UserInfo viewMe(User userId);
+    UserInfo view(String userId);
+    UserInfo viewByName(String username);
 }

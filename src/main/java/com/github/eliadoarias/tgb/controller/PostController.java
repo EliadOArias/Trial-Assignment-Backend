@@ -5,6 +5,7 @@ import com.github.eliadoarias.tgb.dto.PostInfo;
 import com.github.eliadoarias.tgb.result.AjaxResult;
 import com.github.eliadoarias.tgb.service.ConfessionService;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -32,5 +33,21 @@ public class PostController {
             @RequestAttribute("user_id") String userId
     ) {
         return AjaxResult.success(confessionService.send(dto,userId));
+    }
+
+    /**
+     * 点赞
+     * @param id 帖子ID
+     * @param request 请求
+     * @return
+     */
+    @PreAuthorize("hasAuthority('permission:user.upload')")
+    @PostMapping("/{id}/like")
+    public AjaxResult<PostInfo> like(
+            @PathVariable("id") Integer id,
+            HttpServletRequest request
+    ) {
+        String userId = request.getAttribute("user_id").toString();
+        return AjaxResult.success(confessionService.like(userId,id));
     }
 }

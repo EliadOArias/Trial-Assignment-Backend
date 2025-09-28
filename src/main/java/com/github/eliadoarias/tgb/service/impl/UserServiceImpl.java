@@ -85,7 +85,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public UserInfo viewMe(User user) {
+    public UserInfo view(String userId) {
+        User user = baseMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId, userId));
+        if (user == null){
+            throw new ApiException(ExceptionEnum.NOT_FOUND);
+        }
+        return new UserInfo(user.getUsername(), user.getName(), user.getUserId(), user.getUsertype());
+    }
+
+    @Override
+    public UserInfo viewByName(String username) {
+        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUsername, username));
+        if (user == null){
+            throw new ApiException(ExceptionEnum.NOT_FOUND);
+        }
         return new UserInfo(user.getUsername(), user.getName(), user.getUserId(), user.getUsertype());
     }
 }
