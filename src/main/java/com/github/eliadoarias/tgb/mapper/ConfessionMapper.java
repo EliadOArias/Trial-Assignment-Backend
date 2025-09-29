@@ -2,6 +2,8 @@ package com.github.eliadoarias.tgb.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.github.eliadoarias.tgb.entity.Confession;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.cursor.Cursor;
 
 /**
 * @author EArias
@@ -10,6 +12,8 @@ import com.github.eliadoarias.tgb.entity.Confession;
 * @Entity com.github.eliadoarias.tgb.entity.Confession
 */
 public interface ConfessionMapper extends BaseMapper<Confession> {
+    @Select("select * from confession")
+    Cursor<Confession> selectCursor();
 
 }
 

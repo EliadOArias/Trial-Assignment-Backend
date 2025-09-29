@@ -69,6 +69,12 @@ public class PostInfo {
     @JsonFormat( pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateAt;
 
+    /**
+     * 访问用户对该表白是否点赞
+     * @titleName 点赞状态
+     */
+    private boolean liked;
+
     public static PostInfo of(Confession confession){
         return builder()
                 .id(confession.getId())
