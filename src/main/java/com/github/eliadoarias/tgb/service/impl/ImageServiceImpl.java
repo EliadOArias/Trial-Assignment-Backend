@@ -38,13 +38,14 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
         } else {
             File newFile = imageStorageUtil.saveImage(file);
             String newName = newFile.getName();
-            String url = imageStorageUtil.buildUrl(ImageStorageUtil.IMAGE_FOLDER + newName);
+            String url = ImageStorageUtil.IMAGE_FOLDER + newName;
+            String returnUrl = imageStorageUtil.buildUrl(ImageStorageUtil.IMAGE_FOLDER + newName);
 
             baseMapper.insert(Image.builder()
                     .imageUrl(url)
                     .md5Code(md5)
                     .build());
-            return new FileInfo(url);
+            return new FileInfo(returnUrl);
         }
     }
 }

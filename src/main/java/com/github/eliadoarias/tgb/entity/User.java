@@ -30,6 +30,8 @@ public class User {
 
     private Integer usertype;
 
+    private String avatar;
+
     @Override
     public boolean equals(Object that) {
         if (this == that) {

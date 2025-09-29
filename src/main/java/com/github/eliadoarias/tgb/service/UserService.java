@@ -1,8 +1,10 @@
 package com.github.eliadoarias.tgb.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.github.eliadoarias.tgb.dto.RegisterRequest;
 import com.github.eliadoarias.tgb.dto.TokenInfo;
 import com.github.eliadoarias.tgb.dto.UserInfo;
+import com.github.eliadoarias.tgb.dto.UserUpdateRequest;
 import com.github.eliadoarias.tgb.entity.User;
 
 /**
@@ -11,8 +13,9 @@ import com.github.eliadoarias.tgb.entity.User;
 * @createDate 2025-09-16 15:23:13
 */
 public interface UserService extends IService<User> {
-    TokenInfo register(String username, String password, String name, Integer usertype);
+    TokenInfo register(RegisterRequest dto);
     TokenInfo login(String username, String password);
     UserInfo view(String userId);
     UserInfo viewByName(String username);
+    UserInfo update(UserUpdateRequest dto, String userId);
 }

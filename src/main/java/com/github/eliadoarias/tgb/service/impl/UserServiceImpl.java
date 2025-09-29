@@ -3,13 +3,16 @@ package com.github.eliadoarias.tgb.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.eliadoarias.tgb.constant.ExceptionEnum;
+import com.github.eliadoarias.tgb.dto.RegisterRequest;
 import com.github.eliadoarias.tgb.dto.TokenInfo;
 import com.github.eliadoarias.tgb.dto.UserInfo;
+import com.github.eliadoarias.tgb.dto.UserUpdateRequest;
 import com.github.eliadoarias.tgb.entity.User;
 import com.github.eliadoarias.tgb.exception.ApiException;
 import com.github.eliadoarias.tgb.mapper.UserMapper;
 import com.github.eliadoarias.tgb.security.LoginUser;
 import com.github.eliadoarias.tgb.service.UserService;
+import com.github.eliadoarias.tgb.util.ImageStorageUtil;
 import com.github.eliadoarias.tgb.util.JwtUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +22,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -40,27 +44,37 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Resource
     UserMapper userMapper;
 
+    @Resource
+    ImageStorageUtil imageStorageUtil;
+
     private final AuthenticationManager authenticationManager;
 
     public UserServiceImpl(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
     }
 
+    public UserInfo createUserInfo(User user){
+        return new UserInfo(user.getUsername(), user.getName(), user.getUserId(), user.getUsertype(), imageStorageUtil.buildUrl(user.getAvatar()));
+    }
+
     @Override
-    public TokenInfo register(String username, String password, String name, Integer usertype) {
+    public TokenInfo register(RegisterRequest dto) {
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>();
-        queryWrapper.eq(User::getUsername, username);
+        queryWrapper.eq(User::getUsername, dto.getUsername());
         User user = baseMapper.selectOne(queryWrapper);
         if(user != null){
             throw new ApiException(ExceptionEnum.REGISTER_DUPLICATED);
         }
         String userId = UUID.randomUUID().toString();
         User newUser = User.builder()
-                .username(username)
-                .password(encoder.encode(password))
-                .name(name)
-                .usertype(usertype)
+                .username(dto.getUsername())
+                .password(encoder.encode(dto.getPassword()))
+                .name(dto.getName())
+                .usertype(dto.getUsertype())
                 .userId(userId)
+                .avatar(Objects.isNull(
+                        dto.getAvatar())?"avatar-default":imageStorageUtil.getRelativeUrl(dto.getAvatar())
+                )
                 .build();
         baseMapper.insert(newUser);
         String accessToken = jwtUtil.generateAccessToken(userId);
@@ -90,7 +104,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (user == null){
             throw new ApiException(ExceptionEnum.NOT_FOUND);
         }
-        return new UserInfo(user.getUsername(), user.getName(), user.getUserId(), user.getUsertype());
+        return createUserInfo(user);
     }
 
     @Override
@@ -99,7 +113,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (user == null){
             throw new ApiException(ExceptionEnum.NOT_FOUND);
         }
-        return new UserInfo(user.getUsername(), user.getName(), user.getUserId(), user.getUsertype());
+        return createUserInfo(user);
+    }
+
+    @Override
+    public UserInfo update(UserUpdateRequest dto, String userId) {
+        User user = userMapper.selectOne(
+                new LambdaQueryWrapper<User>().eq(User::getUserId, userId)
+        );
+        if(Objects.isNull(user)){throw new ApiException(ExceptionEnum.NOT_FOUND);}
+        if(!Objects.isNull(dto.getUsername()))user.setUsername(dto.getUsername());
+        if(!Objects.isNull(dto.getName()))user.setName(dto.getName());
+        if(!Objects.isNull(dto.getAvatar()))user.setAvatar(imageStorageUtil.getRelativeUrl(dto.getAvatar()));
+        userMapper.updateById(user);
+        return createUserInfo(user);
     }
 }
 

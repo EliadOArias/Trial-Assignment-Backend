@@ -1,10 +1,7 @@
 package com.github.eliadoarias.tgb.controller;
 
 import com.github.eliadoarias.tgb.config.JwtConfig;
-import com.github.eliadoarias.tgb.dto.LoginRequest;
-import com.github.eliadoarias.tgb.dto.RegisterRequest;
-import com.github.eliadoarias.tgb.dto.TokenInfo;
-import com.github.eliadoarias.tgb.dto.UserInfo;
+import com.github.eliadoarias.tgb.dto.*;
 import com.github.eliadoarias.tgb.result.AjaxResult;
 import com.github.eliadoarias.tgb.service.UserService;
 import jakarta.annotation.Resource;
@@ -40,10 +37,7 @@ public class UserController {
     @PostMapping("/register")
     public AjaxResult<TokenInfo> register(@Valid @RequestBody RegisterRequest request) {
         log.info("Try register: "+request.getUsername());
-        return AjaxResult.success(userService.register(request.getUsername(),
-                request.getPassword(),
-                request.getName(),
-                request.getUsertype()));
+        return AjaxResult.success(userService.register(request));
     }
 
     /**
@@ -77,6 +71,21 @@ public class UserController {
     @GetMapping("/{username}")
     public AjaxResult<UserInfo> view(@PathVariable("username") String username) {
         return AjaxResult.success(userService.viewByName(username));
+    }
+
+    /**
+     * 更新用户信息
+     * 包括用户的头像等
+     * @return data为对方的用户信息
+     */
+    @PreAuthorize("hasAuthority('permission:user.upload')")
+    @PutMapping("/me")
+    public AjaxResult<UserInfo> update(
+            @RequestBody UserUpdateRequest dto,
+            HttpServletRequest request
+    ) {
+        String userId = request.getAttribute("user_id").toString();
+        return AjaxResult.success(userService.update(dto, userId));
     }
 
 

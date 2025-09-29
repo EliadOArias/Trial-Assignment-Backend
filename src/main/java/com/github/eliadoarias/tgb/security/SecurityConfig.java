@@ -113,7 +113,7 @@ public class SecurityConfig {
 
     @Bean
     @Order(10)
-    public SecurityFilterChain ResourceFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain resourceFilterChain(HttpSecurity http) throws Exception {
         doCommon(http);
         http.securityMatcher("/resources/**")
                 .authorizeHttpRequests(authz -> authz

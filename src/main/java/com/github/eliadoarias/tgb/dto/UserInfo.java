@@ -37,4 +37,9 @@ public class UserInfo {
      * @example 1
      */
     private Integer usertype;
+    /**
+     * 用户的头像绝对url
+     * @titleName 头像
+     */
+    private String avatar;
 }
