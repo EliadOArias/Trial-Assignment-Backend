@@ -1,6 +1,7 @@
 package com.github.eliadoarias.tgb.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
@@ -9,18 +10,18 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @TableName like
+ * @TableName blacklist
  */
-@TableName(value ="likes")
+@TableName(value ="blacklist")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Data
-public class Likes {
+public class Blacklist {
     @TableId(type =  IdType.AUTO)
     private Integer id;
 
-    private Integer userId;
+    private Integer sourceUserId;
 
-    private Integer postId;
+    private Integer targetUserId;
 }

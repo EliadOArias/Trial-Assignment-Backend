@@ -32,11 +32,15 @@ public class Confession {
 
     private Integer likes;
 
-    private String posterId;
+    private Integer posterId;
 
     private LocalDateTime createAt;
 
     private LocalDateTime updateAt;
 
     private boolean unsent;
+
+    private boolean open;
+
+    private boolean anonymous;
 }

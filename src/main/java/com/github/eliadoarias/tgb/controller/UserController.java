@@ -88,5 +88,35 @@ public class UserController {
         return AjaxResult.success(userService.update(dto, userId));
     }
 
+    /**
+     * 拉黑用户
+     * @param username 用户名
+     * @param request 请求
+     * @return 无
+     */
+    @PreAuthorize("hasAuthority('permission:user.read')")
+    @PutMapping("/blacklist/{username}")
+    public AjaxResult<Object> blacklistAdd(
+            @PathVariable("username") String username,
+            HttpServletRequest request
+    ) {
+        String userId = request.getAttribute("user_id").toString();
+        return AjaxResult.success(userService.blacklistAdd(username,userId));
+    }
 
+    /**
+     * 取消拉黑用户
+     * @param username 用户名
+     * @param request 请求
+     * @return 无
+     */
+    @PreAuthorize("hasAuthority('permission:user.read')")
+    @DeleteMapping("/blacklist/{username}")
+    public AjaxResult<Object> blacklistDelete(
+            @PathVariable("username") String username,
+            HttpServletRequest request
+    ) {
+        String userId = request.getAttribute("user_id").toString();
+        return AjaxResult.success(userService.blacklistDelete(username,userId));
+    }
 }

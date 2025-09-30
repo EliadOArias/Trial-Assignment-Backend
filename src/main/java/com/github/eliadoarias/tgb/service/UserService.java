@@ -18,4 +18,6 @@ public interface UserService extends IService<User> {
     UserInfo view(String userId);
     UserInfo viewByName(String username);
     UserInfo update(UserUpdateRequest dto, String userId);
+    Object blacklistAdd(String username, String sourceUserId);
+    Object blacklistDelete(String username, String sourceUserId);
 }

@@ -7,8 +7,10 @@ import com.github.eliadoarias.tgb.dto.RegisterRequest;
 import com.github.eliadoarias.tgb.dto.TokenInfo;
 import com.github.eliadoarias.tgb.dto.UserInfo;
 import com.github.eliadoarias.tgb.dto.UserUpdateRequest;
+import com.github.eliadoarias.tgb.entity.Blacklist;
 import com.github.eliadoarias.tgb.entity.User;
 import com.github.eliadoarias.tgb.exception.ApiException;
+import com.github.eliadoarias.tgb.mapper.BlacklistMapper;
 import com.github.eliadoarias.tgb.mapper.UserMapper;
 import com.github.eliadoarias.tgb.security.LoginUser;
 import com.github.eliadoarias.tgb.service.UserService;
@@ -46,6 +48,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Resource
     ImageStorageUtil imageStorageUtil;
+
+    @Resource
+    BlacklistMapper blacklistMapper;
 
     private final AuthenticationManager authenticationManager;
 
@@ -127,6 +132,35 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if(!Objects.isNull(dto.getAvatar()))user.setAvatar(imageStorageUtil.getRelativeUrl(dto.getAvatar()));
         userMapper.updateById(user);
         return createUserInfo(user);
+    }
+
+    @Override
+    public Object blacklistAdd(String username, String sourceUserId) {
+        User sourceUser = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId, sourceUserId));
+        User targetUser = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUsername, username));
+        if(Objects.isNull(targetUser))
+            throw new ApiException(ExceptionEnum.USER_NOT_FOUND);
+        if(Objects.equals(sourceUser.getId(), targetUser.getId()))
+            throw new ApiException(ExceptionEnum.REGISTER_DUPLICATED);
+        Blacklist blacklist = Blacklist.builder()
+                .sourceUserId(sourceUser.getId())
+                .targetUserId(targetUser.getId())
+                .build();
+        blacklistMapper.insert(blacklist);
+        return null;
+    }
+
+    @Override
+    public Object blacklistDelete(String username, String sourceUserId) {
+        User sourceUser = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId, sourceUserId));
+        User targetUser = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUsername, username));
+        Blacklist blacklist = blacklistMapper.selectOne(
+                new LambdaQueryWrapper<Blacklist>()
+                        .eq(Blacklist::getSourceUserId, sourceUser.getId())
+                        .eq(Blacklist::getTargetUserId, targetUser.getId())
+        );
+        blacklistMapper.deleteById(blacklist.getId());
+        return null;
     }
 }
 

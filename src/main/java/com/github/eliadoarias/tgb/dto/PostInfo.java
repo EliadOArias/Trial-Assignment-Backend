@@ -51,11 +51,11 @@ public class PostInfo {
      */
     private Integer likes;
     /**
-     * @titleName 投稿者ID
+     * @titleName 投稿者用户名
      * @example aaa-bbb-ccc-ddd
      */
-    @JsonProperty("poster_user_id")
-    private String posterUserId;
+    @JsonProperty("poster_name")
+    private String posterName;
     /**
      * @titleName 创建时间
      */
@@ -75,13 +75,18 @@ public class PostInfo {
      */
     private boolean liked;
 
+    /**
+     * 没有设定部分变量！
+     * @param confession
+     * @return
+     */
     public static PostInfo of(Confession confession){
         return builder()
                 .id(confession.getId())
                 .title(confession.getTitle())
                 .content(confession.getContent())
                 .photos(List.of(confession.getPhotos().split(",")))
-                .posterUserId(confession.getPosterId())
+                .posterName("Anonymous-User")
                 .views(confession.getViews())
                 .likes(confession.getLikes())
                 .createAt(LocalDateTime.now())

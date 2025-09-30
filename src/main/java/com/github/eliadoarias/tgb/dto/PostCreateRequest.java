@@ -43,4 +43,16 @@ public class PostCreateRequest {
     @JsonProperty("send_time")
     @JsonFormat( pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime sendTime;
+
+    /**
+     * 帖子是否公开
+     * @titleName 公开状态
+     */
+    private boolean open;
+
+    /**
+     * 帖子是否匿名
+     * @titleName 匿名状态
+     */
+    private boolean anonymous;
 }
