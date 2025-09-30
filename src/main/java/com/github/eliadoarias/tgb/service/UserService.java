@@ -1,10 +1,7 @@
 package com.github.eliadoarias.tgb.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.github.eliadoarias.tgb.dto.RegisterRequest;
-import com.github.eliadoarias.tgb.dto.TokenInfo;
-import com.github.eliadoarias.tgb.dto.UserInfo;
-import com.github.eliadoarias.tgb.dto.UserUpdateRequest;
+import com.github.eliadoarias.tgb.dto.*;
 import com.github.eliadoarias.tgb.entity.User;
 
 /**
@@ -20,4 +17,5 @@ public interface UserService extends IService<User> {
     UserInfo update(UserUpdateRequest dto, String userId);
     Object blacklistAdd(String username, String sourceUserId);
     Object blacklistDelete(String username, String sourceUserId);
+    BlacklistInfo blacklistGet(String userid);
 }

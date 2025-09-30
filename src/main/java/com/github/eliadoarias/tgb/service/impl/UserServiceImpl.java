@@ -3,10 +3,7 @@ package com.github.eliadoarias.tgb.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.eliadoarias.tgb.constant.ExceptionEnum;
-import com.github.eliadoarias.tgb.dto.RegisterRequest;
-import com.github.eliadoarias.tgb.dto.TokenInfo;
-import com.github.eliadoarias.tgb.dto.UserInfo;
-import com.github.eliadoarias.tgb.dto.UserUpdateRequest;
+import com.github.eliadoarias.tgb.dto.*;
 import com.github.eliadoarias.tgb.entity.Blacklist;
 import com.github.eliadoarias.tgb.entity.User;
 import com.github.eliadoarias.tgb.exception.ApiException;
@@ -24,6 +21,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -161,6 +160,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         );
         blacklistMapper.deleteById(blacklist.getId());
         return null;
+    }
+
+    @Override
+    public BlacklistInfo blacklistGet(String userid) {
+        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId, userid));
+        List<User> blockedUsers = userMapper.selectList(
+                new LambdaQueryWrapper<User>()
+                        .exists(
+                                "select 1 from blacklist b "+
+                                        "where b.source_user_id = {0} "+
+                                        "and b.target_user_id = user.id",
+                                user.getId()
+                        )
+        );
+        List<String> names = new ArrayList<>();
+        for (User e:blockedUsers){
+            names.add(e.getUsername());
+        }
+        return new BlacklistInfo(names);
     }
 }
 

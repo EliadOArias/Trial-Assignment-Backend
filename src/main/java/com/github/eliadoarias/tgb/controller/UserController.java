@@ -89,13 +89,13 @@ public class UserController {
     }
 
     /**
-     * 拉黑用户
+     * 拉黑选择的用户
      * @param username 用户名
      * @param request 请求
      * @return 无
      */
     @PreAuthorize("hasAuthority('permission:user.read')")
-    @PutMapping("/blacklist/{username}")
+    @PostMapping("/blacklist/{username}")
     public AjaxResult<Object> blacklistAdd(
             @PathVariable("username") String username,
             HttpServletRequest request
@@ -118,5 +118,19 @@ public class UserController {
     ) {
         String userId = request.getAttribute("user_id").toString();
         return AjaxResult.success(userService.blacklistDelete(username,userId));
+    }
+
+    /**
+     * 获取黑名单
+     * @param request 请求
+     * @return 无
+     */
+    @PreAuthorize("hasAuthority('permission:user.read')")
+    @GetMapping("/blacklist")
+    public AjaxResult<BlacklistInfo> blacklistGet(
+            HttpServletRequest request
+    ) {
+        String userId = request.getAttribute("user_id").toString();
+        return AjaxResult.success(userService.blacklistGet(userId));
     }
 }

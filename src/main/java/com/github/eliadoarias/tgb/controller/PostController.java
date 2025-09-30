@@ -136,7 +136,6 @@ public class PostController {
     /**
      * 获取某一表白
      * 显示更详细的信息，包括评论情况。
-     * @param dto 数据包
      * @param request 请求
      * @return data为自己的表白
      */
