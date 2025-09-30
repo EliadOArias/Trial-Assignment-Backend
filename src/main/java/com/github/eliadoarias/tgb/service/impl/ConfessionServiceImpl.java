@@ -5,25 +5,21 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.eliadoarias.tgb.constant.ExceptionEnum;
-import com.github.eliadoarias.tgb.dto.PageInfo;
-import com.github.eliadoarias.tgb.dto.PostCreateRequest;
-import com.github.eliadoarias.tgb.dto.PostInfo;
-import com.github.eliadoarias.tgb.entity.Confession;
-import com.github.eliadoarias.tgb.entity.Likes;
-import com.github.eliadoarias.tgb.entity.SendJob;
-import com.github.eliadoarias.tgb.entity.User;
+import com.github.eliadoarias.tgb.dto.*;
+import com.github.eliadoarias.tgb.entity.*;
 import com.github.eliadoarias.tgb.exception.ApiException;
-import com.github.eliadoarias.tgb.mapper.ConfessionMapper;
-import com.github.eliadoarias.tgb.mapper.LikesMapper;
-import com.github.eliadoarias.tgb.mapper.SendJobMapper;
-import com.github.eliadoarias.tgb.mapper.UserMapper;
+import com.github.eliadoarias.tgb.mapper.*;
 import com.github.eliadoarias.tgb.service.ConfessionService;
+import com.github.eliadoarias.tgb.service.UserService;
+import com.github.eliadoarias.tgb.util.ImageStorageUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +49,14 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
     @Resource
     private UserMapper userMapper;
 
+    @Resource
+    private CommentMapper commentMapper;
+
+    @Resource
+    private UserService userService;
+    @Autowired
+    private ImageStorageUtil imageStorageUtil;
+
     @Scheduled(fixedRate = 6000)
     public void trySend() {
         List<SendJob> sendJobs = sendJobMapper.selectList(
@@ -80,14 +84,36 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
         Likes likes = likesMapper.selectOne(
                 new LambdaQueryWrapper<Likes>().eq(Likes::getPostId, postId).eq(Likes::getUserId, user.getId())
         );
-        return createPostInfo(confession, Objects.isNull(likes), user.getName());
+        PostInfo postInfo = PostInfo.of(confession);
+        postInfo.setLiked(Objects.isNull(likes));
+        if(!confession.isAnonymous()) {
+            postInfo.setPosterName(user.getUsername());
+            postInfo.setName(user.getName());
+            postInfo.setAvatar(user.getAvatar());
+        }else {
+            postInfo.setAvatar(imageStorageUtil.buildUrl("default.ico"));
+        }
+        return postInfo;
     }
 
-    private PostInfo createPostInfo(Confession confession, boolean liked, String userName) {
-        PostInfo postInfo = PostInfo.of(confession);
-        postInfo.setLiked(liked);
-        if(confession.isAnonymous())postInfo.setPosterName(userName);
-        return postInfo;
+    private PostDetailInfo createPostDetailInfo(Confession confession, String userId) {
+        User user = userMapper.selectOne(
+                new LambdaQueryWrapper<User>().eq(User::getUserId, userId)
+        );
+        Integer postId = confession.getId();
+        Likes likes = likesMapper.selectOne(
+                new LambdaQueryWrapper<Likes>().eq(Likes::getPostId, postId).eq(Likes::getUserId, user.getId())
+        );
+        PostDetailInfo postDetailInfo = PostDetailInfo.of(confession);
+        postDetailInfo.setLiked(Objects.isNull(likes));
+        if(!confession.isAnonymous()) {
+            postDetailInfo.setPosterName(user.getUsername());
+            postDetailInfo.setName(user.getName());
+            postDetailInfo.setAvatar(user.getAvatar());
+        }else {
+            postDetailInfo.setAvatar(imageStorageUtil.buildUrl("default.ico"));
+        }
+        return postDetailInfo;
     }
 
 
@@ -124,6 +150,27 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
         }
         return createPostInfo(confession, userId);
         //PostInfo.of(confession);
+    }
+
+    @Override
+    public Object delete(Integer confessionId, String userId){
+        Confession confession = baseMapper.selectById(confessionId);
+        if(Objects.isNull(confession)) throw new ApiException(ExceptionEnum.POST_NOT_FOUND);
+        baseMapper.deleteById(confession.getId());
+        return null;
+    }
+
+    @Transactional
+    @Override
+    public PostInfo update(Integer confessionId, PostUpdateRequest dto, String userId) {
+        Confession confession = baseMapper.selectById(confessionId);
+        if(Objects.isNull(confession)) throw new ApiException(ExceptionEnum.POST_NOT_FOUND);
+        if(!Objects.isNull(dto.getOpen()))confession.setOpen(dto.getOpen());
+        if(!Objects.isNull(dto.getContent()))confession.setContent(dto.getContent());
+        if(!Objects.isNull(dto.getTitle()))confession.setTitle(dto.getTitle());
+        if(!Objects.isNull(dto.getPhotos()))confession.setPhotos(String.join(",", dto.getPhotos()));
+        baseMapper.updateById(confession);
+        return createPostInfo(confession,userId);
     }
 
     @Transactional
@@ -196,8 +243,95 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
     }
 
     @Override
+    public PostDetailInfo getDetail(Integer confessionId, String userId) {
+        Confession confession = baseMapper.selectById(confessionId);
+        if(Objects.isNull(confession)) throw new ApiException(ExceptionEnum.POST_NOT_FOUND);
+        PostDetailInfo postDetailInfo = createPostDetailInfo(confession, userId);
+        List<Comment> comments = commentMapper.selectList(
+                new LambdaQueryWrapper<Comment>()
+                        .eq(Comment::getPostId,confessionId)
+        );
+        postDetailInfo.setComments(List.copyOf(comments));
+        return postDetailInfo;
+    }
+
+    @Override
+    public PageInfo getMyList(Integer page, Integer size, String userId) {
+        User userMe = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId,userId));
+        Page<Confession> confessionPage = new Page<>(page, size);
+        Page<Confession> result = baseMapper.selectPage(
+                confessionPage,
+                new LambdaQueryWrapper<Confession>()
+                        .orderByDesc(Confession::getUpdateAt)
+                        .eq(Confession::getPosterId, userMe.getId())
+        );
+        return getPageInfo(userId, result);
+    }
+
+    @Override
     public List<PostInfo> getListByCursor(Integer cursor) {
         return null;
+    }
+
+    @Override
+    public CommentInfo sendComment(CommentRequest dto, Integer postId, String userId) {
+        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId,userId));
+        Confession confession = baseMapper.selectById(postId);
+        if (Objects.isNull(confession)) throw new ApiException(ExceptionEnum.NOT_FOUND);
+        boolean isRoot = false;
+        Comment parentComment = null;
+        Comment rootComment = null;
+        if (Objects.isNull(dto.getParentId())){
+            isRoot = true;
+        } else {
+            parentComment = commentMapper.selectById(dto.getParentId());
+            if (!Objects.isNull(parentComment)){
+                if(!Objects.isNull(parentComment.getRootId())) {
+                    rootComment = commentMapper.selectById(parentComment.getRootId());
+                }
+            }else {
+                isRoot = true;
+            }
+        }
+        Comment comment = Comment.builder()
+                .postId(postId)
+                .userId(user.getId())
+                .rootId(Objects.isNull(rootComment)?-1:rootComment.getId())
+                .parentId(Objects.isNull(parentComment)?null:parentComment.getId())
+                .content(dto.getContent())
+                .createAt(LocalDateTime.now())
+                .updateAt(LocalDateTime.now())
+                .build();
+        commentMapper.insert(comment);
+        if(isRoot){
+            comment.setRootId(comment.getId());
+            commentMapper.updateById(comment);
+        }
+        CommentInfo commentInfo = CommentInfo.of(comment);
+        commentInfo.setUsername(user.getUsername());
+        return commentInfo;
+    }
+
+    @Override
+    public CommentInfo repliesComment(RepliesRequest dto, Integer commentId, String userId) {
+        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId,userId));
+        Comment parentComment = commentMapper.selectById(commentId);
+        if (Objects.isNull(parentComment)) throw new ApiException(ExceptionEnum.NOT_FOUND);
+        Comment rootComment = commentMapper.selectById(parentComment.getRootId());
+        if (Objects.isNull(rootComment)) throw new ApiException(ExceptionEnum.NOT_FOUND);
+        Comment comment = Comment.builder()
+                .postId(parentComment.getPostId())
+                .userId(user.getId())
+                .rootId(rootComment.getId())
+                .parentId(parentComment.getId())
+                .content(dto.getContent())
+                .createAt(LocalDateTime.now())
+                .updateAt(LocalDateTime.now())
+                .build();
+        commentMapper.insert(comment);
+        CommentInfo commentInfo = CommentInfo.of(comment);
+        commentInfo.setUsername(user.getUsername());
+        return commentInfo;
     }
 }
 

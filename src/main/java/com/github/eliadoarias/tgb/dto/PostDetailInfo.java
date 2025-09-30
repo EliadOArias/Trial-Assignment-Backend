@@ -2,6 +2,7 @@ package com.github.eliadoarias.tgb.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.github.eliadoarias.tgb.entity.Comment;
 import com.github.eliadoarias.tgb.entity.Confession;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Data
-public class PostInfo {
+public class PostDetailInfo {
     /**
      * 表白id
      * @titleName 表白ID
@@ -97,11 +98,17 @@ public class PostInfo {
     private boolean anonymous;
 
     /**
-     * 没有设定部分变量 liked,avatar
+     * 此贴的评论列表，每个评论包含索引
+     * @titleName 评论列表
+     */
+    private List<Comment> comments;
+
+    /**
+     * 没有设定部分变量！
      * @param confession
      * @return
      */
-    public static PostInfo of(Confession confession){
+    public static PostDetailInfo of(Confession confession){
         return builder()
                 .id(confession.getId())
                 .title(confession.getTitle())
@@ -110,11 +117,9 @@ public class PostInfo {
                 .posterName("Anonymous-User")
                 .views(confession.getViews())
                 .likes(confession.getLikes())
-                .name("匿名用户")
                 .createAt(LocalDateTime.now())
                 .updateAt(LocalDateTime.now())
                 .open(confession.isOpen())
-                .anonymous(confession.isAnonymous())
                 .build();
     }
 }

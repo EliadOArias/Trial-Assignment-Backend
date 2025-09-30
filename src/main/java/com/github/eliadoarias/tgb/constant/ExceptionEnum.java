@@ -9,7 +9,7 @@ public enum ExceptionEnum {
     SERVER_ERROR(500, "服务器错误"),
     NOT_FOUND(404, "Not Found"),
     USER_NOT_FOUND(404, "目标用户不存在"),
-
+    POST_NOT_FOUND(404, "目标表白不存在"),
     WRONG_TOKEN(2200, "Wrong Token"),
     UNAUTHENTICATED(2001, "认证失败"),
     UNAUTHORIZED(2002, "无权访问"),

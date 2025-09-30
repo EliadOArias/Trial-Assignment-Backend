@@ -1,9 +1,6 @@
 package com.github.eliadoarias.tgb.controller;
 
-import com.github.eliadoarias.tgb.dto.PageInfo;
-import com.github.eliadoarias.tgb.dto.PostCreateRequest;
-import com.github.eliadoarias.tgb.dto.PostGetRequest;
-import com.github.eliadoarias.tgb.dto.PostInfo;
+import com.github.eliadoarias.tgb.dto.*;
 import com.github.eliadoarias.tgb.result.AjaxResult;
 import com.github.eliadoarias.tgb.service.ConfessionService;
 import jakarta.annotation.Resource;
@@ -11,8 +8,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * 表白墙
@@ -25,18 +20,49 @@ public class PostController {
     private ConfessionService confessionService;
 
     /**
-     * 发布
+     * 发布自己的表白
      * @param dto 数据包
-     * @param userId 用户uid
      * @return
      */
     @PreAuthorize("hasAuthority('permission:user.upload')")
     @PostMapping
     public AjaxResult<PostInfo> send(
             @RequestBody PostCreateRequest dto,
-            @RequestAttribute("user_id") String userId
+            HttpServletRequest request
     ) {
+        String userId = request.getAttribute("user_id").toString();
         return AjaxResult.success(confessionService.send(dto,userId));
+    }
+
+    /**
+     * 删除自己的表白
+     * @param confessionId 表白id
+     * @return null
+     */
+    @PreAuthorize("hasAuthority('permission:user.upload')")
+    @DeleteMapping("/{id}")
+    public AjaxResult<Object> delete(
+            @PathVariable("id") Integer confessionId,
+            HttpServletRequest request
+    ) {
+        String userId = request.getAttribute("user_id").toString();
+        return AjaxResult.success(confessionService.delete(confessionId, userId));
+    }
+
+    /**
+     * 修改自己的表白
+     * @param confessionId 表白id
+     * @return null
+     */
+    @PreAuthorize("hasAuthority('permission:user.upload')")
+    @PutMapping("/{id}")
+    public AjaxResult<PostInfo> update(
+            @PathVariable("id") Integer confessionId,
+            @RequestBody PostUpdateRequest dto,
+            HttpServletRequest request
+    ) {
+        String userId = request.getAttribute("user_id").toString();
+        return AjaxResult.success(confessionService.update(confessionId,dto,userId));
     }
 
     /**
@@ -57,7 +83,7 @@ public class PostController {
     }
 
     /**
-     * 获取表白
+     * 获取表白列表
      * 获取帖子，以页码形式获取。输入包含页码和每页的数量，返回包含总页数。
      * @param dto 数据包
      * @param request 请求
@@ -88,5 +114,75 @@ public class PostController {
     ) {
         String userId = request.getAttribute("user_id").toString();
         return AjaxResult.success(confessionService.getHotList(dto.getPage(), dto.getSize(), userId));
+    }
+
+    /**
+     * 获取自己的表白
+     * 获取帖子，以页码形式获取。输入包含页码和每页的数量，返回包含总页数。
+     * @param dto 数据包
+     * @param request 请求
+     * @return data为自己的表白
+     */
+    @PreAuthorize("hasAuthority('permission:user.read')")
+    @GetMapping("/my")
+    public AjaxResult<PageInfo> getMyList(
+            @RequestBody PostGetRequest dto,
+            HttpServletRequest request
+    ) {
+        String userId = request.getAttribute("user_id").toString();
+        return AjaxResult.success(confessionService.getHotList(dto.getPage(), dto.getSize(), userId));
+    }
+
+    /**
+     * 获取某一表白
+     * 显示更详细的信息，包括评论情况。
+     * @param dto 数据包
+     * @param request 请求
+     * @return data为自己的表白
+     */
+    @PreAuthorize("hasAuthority('permission:user.read')")
+    @GetMapping("/{id}")
+    public AjaxResult<PostDetailInfo> get(
+            @PathVariable("id") Integer postId,
+            HttpServletRequest request
+    ) {
+        String userId = request.getAttribute("user_id").toString();
+        return AjaxResult.success(confessionService.getDetail(postId, userId));
+    }
+
+    /**
+     * 发布评论
+     * @param postId 回复帖子id
+     * @param dto 数据包
+     * @param request 请求
+     * @return 返回data为评论信息
+     */
+    @PreAuthorize("hasAuthority('permission:user.read')")
+    @PostMapping("/{id}/comments")
+    public AjaxResult<CommentInfo> comment(
+            @PathVariable("id") Integer postId,
+            @RequestBody CommentRequest dto,
+            HttpServletRequest request
+    ) {
+        String userId = request.getAttribute("user_id").toString();
+        return AjaxResult.success(confessionService.sendComment(dto,postId,userId));
+    }
+
+    /**
+     * 回复评论
+     * @param commentId 回复评论id
+     * @param dto 数据包
+     * @param request 请求
+     * @return 返回data为评论信息
+     */
+    @PreAuthorize("hasAuthority('permission:user.read')")
+    @PostMapping("/{id}/replies")
+    public AjaxResult<CommentInfo> replies(
+            @PathVariable("id") Integer commentId,
+            @RequestBody RepliesRequest dto,
+            HttpServletRequest request
+    ) {
+        String userId = request.getAttribute("user_id").toString();
+        return AjaxResult.success(confessionService.repliesComment(dto,commentId,userId));
     }
 }
