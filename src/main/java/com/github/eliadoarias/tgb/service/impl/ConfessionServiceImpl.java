@@ -83,8 +83,13 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
         Likes likes = likesMapper.selectOne(
                 new LambdaQueryWrapper<Likes>().eq(Likes::getPostId, postId).eq(Likes::getUserId, user.getId())
         );
+        List<String> photoAbsoluteUrls = new ArrayList<>();
+        for (String photo : confession.getPhotos().split(",")){
+            photoAbsoluteUrls.add(imageStorageUtil.buildUrl(photo));
+        }
         PostInfo postInfo = PostInfo.of(confession);
         postInfo.setLiked(Objects.isNull(likes));
+        postInfo.setPhotos(photoAbsoluteUrls);
         if(!confession.isAnonymous()) {
             postInfo.setPosterName(user.getUsername());
             postInfo.setName(user.getName());
@@ -118,15 +123,23 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
 
     @Override
     public PostInfo send(PostCreateRequest dto, String userId) {
+        if (
+                Objects.isNull(dto.getContent())
+                        || Objects.isNull(dto.getTitle())
+        ) throw new ApiException(ExceptionEnum.INVALID_PARAMETERS);
         if (dto.getContent().length()>200) throw new ApiException(ExceptionEnum.POST_CONTENT_TOO_LONG);
         if (dto.getTitle().length()>50) throw new ApiException(ExceptionEnum.POST_TITLE_TOO_LONG);
         User user = userMapper.selectOne(
                 new  LambdaQueryWrapper<User>().eq(User::getUserId,userId)
         );
+        List<String> photoRelativeUrls = new ArrayList<>();
+        for(String photo : dto.getPhotos()) {
+            photoRelativeUrls.add(imageStorageUtil.getRelativeUrl(photo));
+        }
         Confession confession = Confession.builder()
                 .title(dto.getTitle())
                 .content(dto.getContent())
-                .photos(String.join(",", dto.getPhotos()))
+                .photos(String.join(",", photoRelativeUrls))
                 .posterId(user.getId())
                 .views(0)
                 .likes(0)
@@ -167,8 +180,8 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
     @Transactional
     @Override
     public PostInfo update(Integer confessionId, PostUpdateRequest dto, String userId) {
-        if (dto.getContent().length()>200) throw new ApiException(ExceptionEnum.POST_CONTENT_TOO_LONG);
-        if (dto.getTitle().length()>50) throw new ApiException(ExceptionEnum.POST_TITLE_TOO_LONG);
+        if (!Objects.isNull(dto.getContent())&&dto.getContent().length()>200) throw new ApiException(ExceptionEnum.POST_CONTENT_TOO_LONG);
+        if (!Objects.isNull(dto.getTitle())&&dto.getTitle().length()>50) throw new ApiException(ExceptionEnum.POST_TITLE_TOO_LONG);
         Confession confession = baseMapper.selectById(confessionId);
         User user = userMapper.selectOne(
                 new LambdaQueryWrapper<User>().eq(User::getUserId,userId)
@@ -178,7 +191,13 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
         if(!Objects.isNull(dto.getOpen()))confession.setOpen(dto.getOpen());
         if(!Objects.isNull(dto.getContent()))confession.setContent(dto.getContent());
         if(!Objects.isNull(dto.getTitle()))confession.setTitle(dto.getTitle());
-        if(!Objects.isNull(dto.getPhotos()))confession.setPhotos(String.join(",", dto.getPhotos()));
+        List<String> photoRelativeUrls = new ArrayList<>();
+        if(!Objects.isNull(dto.getPhotos())){
+            for(String photo : dto.getPhotos()) {
+                photoRelativeUrls.add(imageStorageUtil.getRelativeUrl(photo));
+            }
+        }
+        if(!Objects.isNull(dto.getPhotos()))confession.setPhotos(String.join(",", photoRelativeUrls));
         baseMapper.updateById(confession);
         return createPostInfo(confession,userId);
     }
@@ -252,6 +271,7 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
         return getPageInfo(userId, result);
     }
 
+    @Transactional
     @Override
     public PostDetailInfo getDetail(Integer confessionId, String userId) {
         Confession confession = baseMapper.selectById(confessionId);
@@ -261,6 +281,8 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
                 new LambdaQueryWrapper<Comment>()
                         .eq(Comment::getPostId,confessionId)
         );
+        confession.setViews(confession.getViews() + 1);
+        baseMapper.updateById(confession);
         postDetailInfo.setComments(List.copyOf(comments));
         return postDetailInfo;
     }
@@ -285,6 +307,9 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
 
     @Override
     public CommentInfo sendComment(CommentRequest dto, Integer postId, String userId) {
+        if (
+                Objects.isNull(dto.getContent())
+        ) throw new ApiException(ExceptionEnum.INVALID_PARAMETERS);
         if (dto.getContent().length()>200) throw new ApiException(ExceptionEnum.COMMENT_CONTENT_TOO_LONG);
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId,userId));
         Confession confession = baseMapper.selectById(postId);
@@ -325,6 +350,9 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
 
     @Override
     public CommentInfo repliesComment(RepliesRequest dto, Integer commentId, String userId) {
+        if (
+                Objects.isNull(dto.getContent())
+        ) throw new ApiException(ExceptionEnum.INVALID_PARAMETERS);
         if (dto.getContent().length()>200) throw new ApiException(ExceptionEnum.COMMENT_CONTENT_TOO_LONG);
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId,userId));
         Comment parentComment = commentMapper.selectById(commentId);

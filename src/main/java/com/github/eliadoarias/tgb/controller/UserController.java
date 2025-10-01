@@ -32,6 +32,7 @@ public class UserController {
      * 前端需要存储两种token，并在大多数操作时于header中发送。
      * Authorization: Bearer xxxx-xxxx-xxxx
      * 可能的异常：
+     * INVALID_PARAMETERS(2003, "参数错误"),
      * PASSWORD_TOO_SHORT(2301, "密码短于6个字符"),
      * PASSWORD_TOO_LONG(2302, "密码长于20个字符"),
      * PASSWORD_INVALID_CHA(2303, "密码包含非法字符（只能包含英文字符和部分符号）"),

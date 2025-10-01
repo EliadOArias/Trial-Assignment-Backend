@@ -1,5 +1,6 @@
 package com.github.eliadoarias.tgb.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,5 +16,6 @@ public class RefreshRequest {
      * 用于刷新的token
      * @titleName 刷新token
      */
+    @JsonProperty("refresh-token")
     private String refreshToken;
 }

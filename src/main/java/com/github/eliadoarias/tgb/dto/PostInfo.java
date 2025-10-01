@@ -97,7 +97,7 @@ public class PostInfo {
     private boolean anonymous;
 
     /**
-     * 没有设定部分变量 liked,avatar
+     * 没有设定部分变量 liked,avatar,photos
      * @param confession
      * @return
      */
@@ -106,7 +106,6 @@ public class PostInfo {
                 .id(confession.getId())
                 .title(confession.getTitle())
                 .content(confession.getContent())
-                .photos(List.of(confession.getPhotos().split(",")))
                 .posterName("Anonymous-User")
                 .views(confession.getViews())
                 .likes(confession.getLikes())

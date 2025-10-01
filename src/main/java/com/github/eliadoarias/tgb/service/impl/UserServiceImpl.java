@@ -65,6 +65,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Override
     public TokenInfo register(RegisterRequest dto) {
         //错误处理
+        if (
+                Objects.isNull(dto.getUsername())
+                        || Objects.isNull(dto.getName())
+                        || Objects.isNull(dto.getPassword())
+                        || Objects.isNull(dto.getAvatar())
+        ) throw new ApiException(ExceptionEnum.INVALID_PARAMETERS);
         if (dto.getPassword().length()<6) throw new ApiException(ExceptionEnum.PASSWORD_TOO_SHORT);
         if (dto.getPassword().length()>20) throw new ApiException(ExceptionEnum.PASSWORD_TOO_LONG);
         if (!dto.getPassword().matches("^[\\x20-\\x7E]+$")) throw new ApiException(ExceptionEnum.PASSWORD_INVALID_CHA);
@@ -129,9 +135,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public UserInfo update(UserUpdateRequest dto, String userId) {
-        if (dto.getUsername().length()<6) throw new ApiException(ExceptionEnum.USERNAME_TOO_SHORT);
-        if (dto.getUsername().length()>20) throw new ApiException(ExceptionEnum.USERNAME_TOO_LONG);
-        if (!dto.getUsername().matches("^[\\x20-\\x7E]+$")) throw new ApiException(ExceptionEnum.USERNAME_INVALID_CHA);
+        if (!Objects.isNull(dto.getUsername())&&dto.getUsername().length()<6) throw new ApiException(ExceptionEnum.USERNAME_TOO_SHORT);
+        if (!Objects.isNull(dto.getUsername())&&dto.getUsername().length()>20) throw new ApiException(ExceptionEnum.USERNAME_TOO_LONG);
+        if (!Objects.isNull(dto.getUsername())&&!dto.getUsername().matches("^[\\x20-\\x7E]+$")) throw new ApiException(ExceptionEnum.USERNAME_INVALID_CHA);
         User user = userMapper.selectOne(
                 new LambdaQueryWrapper<User>().eq(User::getUserId, userId)
         );
