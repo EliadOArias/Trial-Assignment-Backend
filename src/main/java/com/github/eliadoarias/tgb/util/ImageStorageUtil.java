@@ -32,7 +32,7 @@ public class ImageStorageUtil {
 
     public String getRelativeUrl(String absoluteUrl) {
         if(!absoluteUrl.startsWith(pathConfig.getRootUrl())){
-            throw new ApiException(ExceptionEnum.NOT_FOUND);
+            throw new ApiException(ExceptionEnum.IMAGE_URL_ERROR);
         }
         return absoluteUrl.substring((pathConfig.getRootUrl() + "resources/").length());
     }

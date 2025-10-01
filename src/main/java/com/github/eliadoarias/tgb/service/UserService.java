@@ -18,4 +18,5 @@ public interface UserService extends IService<User> {
     Object blacklistAdd(String username, String sourceUserId);
     Object blacklistDelete(String username, String sourceUserId);
     BlacklistInfo blacklistGet(String userid);
+    TokenInfo refresh(String refreshToken);
 }

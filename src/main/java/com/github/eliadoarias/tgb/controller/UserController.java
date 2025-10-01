@@ -31,27 +31,49 @@ public class UserController {
      * 提供账号，密码，昵称，用户类型进行注册。注册后会自动生成一个外部id和内部id。
      * 前端需要存储两种token，并在大多数操作时于header中发送。
      * Authorization: Bearer xxxx-xxxx-xxxx
-     * @param request 包含用户基本信息
-     * @return 返回登录token
+     * 可能的异常：
+     * PASSWORD_TOO_SHORT(2301, "密码短于6个字符"),
+     * PASSWORD_TOO_LONG(2302, "密码长于20个字符"),
+     * PASSWORD_INVALID_CHA(2303, "密码包含非法字符（只能包含英文字符和部分符号）"),
+     * USERNAME_TOO_SHORT(2304, "用户名短于6个字符"),
+     * USERNAME_TOO_LONG(2305, "用户名长于20个字符"),
+     * USERNAME_INVALID_CHA(2306, "用户名包含非法字符（只能包含英文字符和和部分符号）"),
+     * NAME_TOO_SHORT(2307, "昵称为空"),
+     * NAME_TOO_LONG(2308, "昵称长于20个字符"),
+     * USERTYPE_ERROR(2309, "没有足够权限创建该类型的用户或用户类型不存在"),
+     * REGISTER_DUPLICATED(2310, "用户名已存在"),
+     * IMAGE_URL_ERROR(2501,"图片url格式错误")
+     * @param dto 包含用户基本信息
+     * @return 返回登录token和刷新token
      */
     @PostMapping("/register")
-    public AjaxResult<TokenInfo> register(@Valid @RequestBody RegisterRequest request) {
-        log.info("Try register: "+request.getUsername());
-        return AjaxResult.success(userService.register(request));
+    public AjaxResult<TokenInfo> register(@Valid @RequestBody RegisterRequest dto) {
+        log.info("Try register: "+dto.getUsername());
+        return AjaxResult.success(userService.register(dto));
     }
 
     /**
      * 登录
-     * @return 登录token
+     * 提供账号名和密码进行登录，返回token。
+     * 前端需要存储token。
+     * 可能的异常：
+     * LOGIN_ERROR(2401, "账号或密码错误")
+     * @param dto 数据包
+     * @return 返回登录token和刷新token
      */
     @PostMapping("/login")
-    public AjaxResult<TokenInfo> login(@RequestBody LoginRequest request) {
+    public AjaxResult<TokenInfo> login(@RequestBody LoginRequest dto) {
         log.info("should never do here ");
         return null;
     }
 
     /**
      * 查看个人信息
+     * 查看个人的用户信息
+     * 可能的异常：
+     * TOKEN_EXP(2201, "token已过期"),
+     * TOKEN_MISTAKE(2202, "token错误"),
+     * UNAUTHORIZED(2002, "无权访问")
      * @param request 请求
      * @return 返回个人信息
      */
@@ -64,6 +86,11 @@ public class UserController {
 
     /**
      * 查看用户信息
+     * 可能的异常：
+     * TOKEN_EXP(2201, "token已过期"),
+     * TOKEN_MISTAKE(2202, "token错误"),
+     * UNAUTHORIZED(2002, "无权访问"),
+     * USER_NOT_FOUND(404, "目标用户不存在")
      * @param username 用户名
      * @return data为对方的用户信息
      */
@@ -76,6 +103,12 @@ public class UserController {
     /**
      * 更新用户信息
      * 包括用户的头像等
+     * 可能的异常：
+     * TOKEN_EXP(2201, "token已过期"),
+     * TOKEN_MISTAKE(2202, "token错误"),
+     * UNAUTHORIZED(2002, "无权访问"),
+     * REGISTER_DUPLICATED(2310, "用户名已存在"),
+     * IMAGE_URL_ERROR(2501,"图片url格式错误")
      * @return data为对方的用户信息
      */
     @PreAuthorize("hasAuthority('permission:user.upload')")
@@ -90,6 +123,13 @@ public class UserController {
 
     /**
      * 拉黑选择的用户
+     * 可能的异常：
+     * TOKEN_EXP(2201, "token已过期"),
+     * TOKEN_MISTAKE(2202, "token错误"),
+     * USER_NOT_FOUND(404, "目标用户不存在"),
+     * UNAUTHORIZED(2002, "无权访问"),
+     * BLACKLIST_DUPLICATED(2601,"拉黑目标为自己"),
+     * BLACKLIST_ADDED(2602,"用户已经被拉黑")
      * @param username 用户名
      * @param request 请求
      * @return 无
@@ -106,6 +146,12 @@ public class UserController {
 
     /**
      * 取消拉黑用户
+     * 可能的异常：
+     * TOKEN_EXP(2201, "token已过期"),
+     * TOKEN_MISTAKE(2202, "token错误"),
+     * USER_NOT_FOUND(404, "目标用户不存在"),
+     * UNAUTHORIZED(2002, "无权访问"),
+     * BLACKLIST_NOT_EXISTS(2603,"用户没有被拉黑"),
      * @param username 用户名
      * @param request 请求
      * @return 无
@@ -122,6 +168,10 @@ public class UserController {
 
     /**
      * 获取黑名单
+     * 可能的异常：
+     * TOKEN_EXP(2201, "token已过期"),
+     * TOKEN_MISTAKE(2202, "token错误"),
+     * UNAUTHORIZED(2002, "无权访问")
      * @param request 请求
      * @return 无
      */
@@ -132,5 +182,19 @@ public class UserController {
     ) {
         String userId = request.getAttribute("user_id").toString();
         return AjaxResult.success(userService.blacklistGet(userId));
+    }
+
+    /**
+     * 刷新token
+     * 可能的异常：
+     * TOKEN_EXP(2201, "token已过期"),
+     * TOKEN_MISTAKE(2202, "token错误")
+     * @return 无
+     */
+    @GetMapping("/refresh-token")
+    public AjaxResult<TokenInfo> refreshToken(
+            @RequestBody RefreshRequest dto
+    ) {
+        return AjaxResult.success(userService.refresh(dto.getRefreshToken()));
     }
 }

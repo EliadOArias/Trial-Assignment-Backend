@@ -5,6 +5,9 @@ import com.github.eliadoarias.tgb.constant.ExceptionEnum;
 import com.github.eliadoarias.tgb.result.AjaxResult;
 import com.github.eliadoarias.tgb.util.ExceptionUtil;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -47,7 +50,18 @@ public class ValidateExceptionHandler {
     @ResponseBody
     public AjaxResult<Object> handleExpiredJwtException(Exception e) {
         ExceptionUtil.printError(e);
-        return AjaxResult.error(ExceptionEnum.USER_EXP);
+        return AjaxResult.error(ExceptionEnum.TOKEN_EXP);
+    }
+
+    @ExceptionHandler({
+            UnsupportedJwtException.class,
+            MalformedJwtException.class,
+            SignatureException.class
+    })
+    @ResponseBody
+    public AjaxResult<Object> handleMistakeJwtException(Exception e) {
+        ExceptionUtil.printError(e);
+        return AjaxResult.error(ExceptionEnum.TOKEN_MISTAKE);
     }
 
     @ExceptionHandler({

@@ -48,7 +48,7 @@ public class LoginSuccessHandler extends AbstractAuthenticationTargetUrlRequestH
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         Object principal = authentication.getPrincipal();
         if(principal == null)
-            throw new ApiException(ExceptionEnum.LOGIN_ERROR);
+            throw new ApiException(ExceptionEnum.USER_NOT_FOUND);
         LoginUser loginUser = (LoginUser) principal;
         TokenInfo tokenInfo = new TokenInfo(
                 jwtUtil.generateAccessToken(loginUser.getUserId()),

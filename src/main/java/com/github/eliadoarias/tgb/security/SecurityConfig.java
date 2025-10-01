@@ -69,6 +69,16 @@ public class SecurityConfig {
     }
 
     @Bean
+    @Order(0)
+    public SecurityFilterChain refreshFilterChain(HttpSecurity http, LoginSuccessHandler loginSuccessHandler, LoginFailHandler loginFailHandler) throws Exception {
+        doCommon(http);
+        http.securityMatcher("/api/users/refresh-token")
+                .authorizeHttpRequests(authz -> authz
+                        .anyRequest().permitAll());
+        return http.build();
+    }
+
+    @Bean
     @Order(1)
     public SecurityFilterChain loginFilterChain(HttpSecurity http, LoginSuccessHandler loginSuccessHandler, LoginFailHandler loginFailHandler) throws Exception {
         LoginSuccessHandler successHandler = applicationContext.getBean(LoginSuccessHandler.class);

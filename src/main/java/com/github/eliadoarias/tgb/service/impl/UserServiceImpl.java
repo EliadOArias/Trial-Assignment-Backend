@@ -12,6 +12,7 @@ import com.github.eliadoarias.tgb.mapper.UserMapper;
 import com.github.eliadoarias.tgb.security.LoginUser;
 import com.github.eliadoarias.tgb.service.UserService;
 import com.github.eliadoarias.tgb.util.ImageStorageUtil;
+import com.github.eliadoarias.tgb.util.JwtReader;
 import com.github.eliadoarias.tgb.util.JwtUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -63,12 +64,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public TokenInfo register(RegisterRequest dto) {
-        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>();
-        queryWrapper.eq(User::getUsername, dto.getUsername());
-        User user = baseMapper.selectOne(queryWrapper);
-        if(user != null){
-            throw new ApiException(ExceptionEnum.REGISTER_DUPLICATED);
-        }
+        //错误处理
+        if (dto.getPassword().length()<6) throw new ApiException(ExceptionEnum.PASSWORD_TOO_SHORT);
+        if (dto.getPassword().length()>20) throw new ApiException(ExceptionEnum.PASSWORD_TOO_LONG);
+        if (!dto.getPassword().matches("^[\\x20-\\x7E]+$")) throw new ApiException(ExceptionEnum.PASSWORD_INVALID_CHA);
+        if (dto.getUsername().length()<6) throw new ApiException(ExceptionEnum.USERNAME_TOO_SHORT);
+        if (dto.getUsername().length()>20) throw new ApiException(ExceptionEnum.USERNAME_TOO_LONG);
+        if (!dto.getUsername().matches("^[\\x20-\\x7E]+$")) throw new ApiException(ExceptionEnum.USERNAME_INVALID_CHA);
+        if (dto.getName().isBlank()) throw new ApiException(ExceptionEnum.NAME_TOO_SHORT);
+        if (dto.getName().length()>20) throw new ApiException(ExceptionEnum.NAME_TOO_LONG);
+        if ((dto.getUsertype()&LoginUser.ROLE_USER)!=1) throw new ApiException(ExceptionEnum.USERTYPE_ERROR);
+        User user = baseMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUsername, dto.getUsername()));
+        if(user != null)throw new ApiException(ExceptionEnum.REGISTER_DUPLICATED);
+        //功能
+
         String userId = UUID.randomUUID().toString();
         User newUser = User.builder()
                 .username(dto.getUsername())
@@ -114,9 +123,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Override
     public UserInfo viewByName(String username) {
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUsername, username));
-        if (user == null){
-            throw new ApiException(ExceptionEnum.NOT_FOUND);
-        }
+        if (user == null) throw new ApiException(ExceptionEnum.USER_NOT_FOUND);
         return createUserInfo(user);
     }
 
@@ -125,8 +132,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         User user = userMapper.selectOne(
                 new LambdaQueryWrapper<User>().eq(User::getUserId, userId)
         );
-        if(Objects.isNull(user)){throw new ApiException(ExceptionEnum.NOT_FOUND);}
-        if(!Objects.isNull(dto.getUsername()))user.setUsername(dto.getUsername());
+        if(Objects.isNull(user)){throw new ApiException(ExceptionEnum.USER_NOT_FOUND);}
+        if(!Objects.isNull(dto.getUsername())){
+            User tryUser = baseMapper.selectOne(
+                    new LambdaQueryWrapper<User>().eq(User::getUsername, dto.getUsername())
+            );
+            if(!Objects.isNull(tryUser))throw new ApiException(ExceptionEnum.REGISTER_DUPLICATED);
+            user.setUsername(dto.getUsername());
+        }
+
         if(!Objects.isNull(dto.getName()))user.setName(dto.getName());
         if(!Objects.isNull(dto.getAvatar()))user.setAvatar(imageStorageUtil.getRelativeUrl(dto.getAvatar()));
         userMapper.updateById(user);
@@ -140,7 +154,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if(Objects.isNull(targetUser))
             throw new ApiException(ExceptionEnum.USER_NOT_FOUND);
         if(Objects.equals(sourceUser.getId(), targetUser.getId()))
-            throw new ApiException(ExceptionEnum.REGISTER_DUPLICATED);
+            throw new ApiException(ExceptionEnum.BLACKLIST_DUPLICATED);
+        Blacklist tryBlacklist = blacklistMapper.selectOne(
+                new LambdaQueryWrapper<Blacklist>()
+                        .eq(Blacklist::getSourceUserId,sourceUser.getId())
+                        .eq(Blacklist::getTargetUserId,targetUser.getId())
+        );
+        if(!Objects.isNull(tryBlacklist)) throw new ApiException(ExceptionEnum.BLACKLIST_ADDED);
         Blacklist blacklist = Blacklist.builder()
                 .sourceUserId(sourceUser.getId())
                 .targetUserId(targetUser.getId())
@@ -158,6 +178,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
                         .eq(Blacklist::getSourceUserId, sourceUser.getId())
                         .eq(Blacklist::getTargetUserId, targetUser.getId())
         );
+        if(Objects.isNull(blacklist)) throw new ApiException(ExceptionEnum.BLACKLIST_NOT_EXISTS);
         blacklistMapper.deleteById(blacklist.getId());
         return null;
     }
@@ -179,6 +200,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             names.add(e.getUsername());
         }
         return new BlacklistInfo(names);
+    }
+
+    @Override
+    public TokenInfo refresh(String refreshToken) {
+        JwtReader reader = jwtUtil.readToken(refreshToken);
+        String userId = reader.getId();
+        String accessToken = jwtUtil.generateAccessToken(userId);
+        return new TokenInfo(accessToken,refreshToken);
     }
 }
 
