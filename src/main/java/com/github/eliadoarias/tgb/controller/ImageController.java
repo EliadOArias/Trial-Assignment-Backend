@@ -32,6 +32,11 @@ public class ImageController {
     /**
      * 上传图片
      * 上传一张图片。
+     * 可能的异常：
+     * IMAGE_URL_ERROR(2501,"图片url格式错误"),
+     * TOKEN_EXP(2201, "token已过期"),
+     * TOKEN_MISTAKE(2202, "token错误"),
+     * UNAUTHORIZED(2002, "无权访问")
      * @param file 图片文件。
      * @return 返回图片文件url。
      */
