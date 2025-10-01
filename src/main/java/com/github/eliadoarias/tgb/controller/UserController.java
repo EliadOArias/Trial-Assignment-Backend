@@ -107,6 +107,9 @@ public class UserController {
      * TOKEN_EXP(2201, "token已过期"),
      * TOKEN_MISTAKE(2202, "token错误"),
      * UNAUTHORIZED(2002, "无权访问"),
+     * USERNAME_TOO_SHORT(2304, "用户名短于6个字符"),
+     * USERNAME_TOO_LONG(2305, "用户名长于20个字符"),
+     * USERNAME_INVALID_CHA(2306, "用户名包含非法字符（只能包含英文字符和和部分符号）"),
      * REGISTER_DUPLICATED(2310, "用户名已存在"),
      * IMAGE_URL_ERROR(2501,"图片url格式错误")
      * @return data为对方的用户信息

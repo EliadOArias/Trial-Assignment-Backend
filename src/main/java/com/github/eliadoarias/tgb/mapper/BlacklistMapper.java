@@ -1,7 +1,7 @@
 package com.github.eliadoarias.tgb.mapper;
 
-import com.github.eliadoarias.tgb.entity.Blacklist;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.github.eliadoarias.tgb.entity.Blacklist;
 
 /**
 * @author EArias

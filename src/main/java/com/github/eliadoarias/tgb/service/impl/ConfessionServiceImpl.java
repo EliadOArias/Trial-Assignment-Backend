@@ -19,7 +19,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -119,6 +118,8 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
 
     @Override
     public PostInfo send(PostCreateRequest dto, String userId) {
+        if (dto.getContent().length()>200) throw new ApiException(ExceptionEnum.POST_CONTENT_TOO_LONG);
+        if (dto.getTitle().length()>50) throw new ApiException(ExceptionEnum.POST_TITLE_TOO_LONG);
         User user = userMapper.selectOne(
                 new  LambdaQueryWrapper<User>().eq(User::getUserId,userId)
         );
@@ -149,13 +150,16 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
             baseMapper.insert(confession);
         }
         return createPostInfo(confession, userId);
-        //PostInfo.of(confession);
     }
 
     @Override
     public Object delete(Integer confessionId, String userId){
         Confession confession = baseMapper.selectById(confessionId);
-        if(Objects.isNull(confession)) throw new ApiException(ExceptionEnum.POST_NOT_FOUND);
+        if (Objects.isNull(confession)) throw new ApiException(ExceptionEnum.POST_NOT_FOUND);
+        User user = userMapper.selectOne(
+                new LambdaQueryWrapper<User>().eq(User::getUserId,userId)
+        );
+        if (!Objects.equals(confession.getPosterId(), user.getId())) throw new ApiException(ExceptionEnum.POST_UPDATE_NOOP);
         baseMapper.deleteById(confession.getId());
         return null;
     }
@@ -163,8 +167,14 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
     @Transactional
     @Override
     public PostInfo update(Integer confessionId, PostUpdateRequest dto, String userId) {
+        if (dto.getContent().length()>200) throw new ApiException(ExceptionEnum.POST_CONTENT_TOO_LONG);
+        if (dto.getTitle().length()>50) throw new ApiException(ExceptionEnum.POST_TITLE_TOO_LONG);
         Confession confession = baseMapper.selectById(confessionId);
-        if(Objects.isNull(confession)) throw new ApiException(ExceptionEnum.POST_NOT_FOUND);
+        User user = userMapper.selectOne(
+                new LambdaQueryWrapper<User>().eq(User::getUserId,userId)
+        );
+        if (Objects.isNull(confession)) throw new ApiException(ExceptionEnum.POST_NOT_FOUND);
+        if (!Objects.equals(confession.getPosterId(), user.getId())) throw new ApiException(ExceptionEnum.POST_UPDATE_NOOP);
         if(!Objects.isNull(dto.getOpen()))confession.setOpen(dto.getOpen());
         if(!Objects.isNull(dto.getContent()))confession.setContent(dto.getContent());
         if(!Objects.isNull(dto.getTitle()))confession.setTitle(dto.getTitle());
@@ -275,9 +285,10 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
 
     @Override
     public CommentInfo sendComment(CommentRequest dto, Integer postId, String userId) {
+        if (dto.getContent().length()>200) throw new ApiException(ExceptionEnum.COMMENT_CONTENT_TOO_LONG);
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId,userId));
         Confession confession = baseMapper.selectById(postId);
-        if (Objects.isNull(confession)) throw new ApiException(ExceptionEnum.NOT_FOUND);
+        if (Objects.isNull(confession)) throw new ApiException(ExceptionEnum.POST_NOT_FOUND);
         boolean isRoot = false;
         Comment parentComment = null;
         Comment rootComment = null;
@@ -314,11 +325,12 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
 
     @Override
     public CommentInfo repliesComment(RepliesRequest dto, Integer commentId, String userId) {
+        if (dto.getContent().length()>200) throw new ApiException(ExceptionEnum.COMMENT_CONTENT_TOO_LONG);
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId,userId));
         Comment parentComment = commentMapper.selectById(commentId);
-        if (Objects.isNull(parentComment)) throw new ApiException(ExceptionEnum.NOT_FOUND);
+        if (Objects.isNull(parentComment)) throw new ApiException(ExceptionEnum.COMMENT_NOT_FOUND);
         Comment rootComment = commentMapper.selectById(parentComment.getRootId());
-        if (Objects.isNull(rootComment)) throw new ApiException(ExceptionEnum.NOT_FOUND);
+        if (Objects.isNull(rootComment)) throw new ApiException(ExceptionEnum.COMMENT_NOT_FOUND);
         Comment comment = Comment.builder()
                 .postId(parentComment.getPostId())
                 .userId(user.getId())

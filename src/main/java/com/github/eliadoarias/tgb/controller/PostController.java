@@ -21,6 +21,12 @@ public class PostController {
 
     /**
      * 发布自己的表白
+     * 可能的异常：
+     * TOKEN_EXP(2201, "token已过期"),
+     * TOKEN_MISTAKE(2202, "token错误"),
+     * UNAUTHORIZED(2002, "无权访问"),
+     * POST_CONTENT_TOO_LONG(2701,"表白内容超过200字符"),
+     * POST_TITLE_TOO_LONG(2702,"表白标题超过50字符")
      * @param dto 数据包
      * @return
      */
@@ -36,6 +42,12 @@ public class PostController {
 
     /**
      * 删除自己的表白
+     * 可能的异常：
+     * POST_NOT_FOUND(404, "目标表白不存在"),
+     * TOKEN_EXP(2201, "token已过期"),
+     * TOKEN_MISTAKE(2202, "token错误"),
+     * UNAUTHORIZED(2002, "无权访问"),
+     * POST_UPDATE_NOOP(2703,"无权限修改这个帖子，因为这个帖子不是你发布且你不是管理员")
      * @param confessionId 表白id
      * @return null
      */
@@ -51,6 +63,14 @@ public class PostController {
 
     /**
      * 修改自己的表白
+     * 可能的异常：
+     * POST_NOT_FOUND(404, "目标表白不存在"),
+     * TOKEN_EXP(2201, "token已过期"),
+     * TOKEN_MISTAKE(2202, "token错误"),
+     * UNAUTHORIZED(2002, "无权访问"),
+     * POST_CONTENT_TOO_LONG(2701,"表白内容超过200字符"),
+     * POST_TITLE_TOO_LONG(2702,"表白标题超过50字符"),
+     * POST_UPDATE_NOOP(2703,"无权限修改这个帖子，因为这个帖子不是你发布且你不是管理员")
      * @param confessionId 表白id
      * @return null
      */
@@ -68,6 +88,11 @@ public class PostController {
     /**
      * 点赞
      * 点赞功能，toggle接口。将点赞状态反转（已点赞时取消，未点赞时点赞）
+     * 可能的异常：
+     * POST_NOT_FOUND(404, "目标表白不存在"),
+     * TOKEN_EXP(2201, "token已过期"),
+     * TOKEN_MISTAKE(2202, "token错误"),
+     * UNAUTHORIZED(2002, "无权访问")
      * @param id 帖子ID
      * @param request 请求
      * @return 更新后的点赞状态
@@ -85,6 +110,10 @@ public class PostController {
     /**
      * 获取表白列表
      * 获取帖子，以页码形式获取。输入包含页码和每页的数量，返回包含总页数。
+     * 可能的异常：
+     * TOKEN_EXP(2201, "token已过期"),
+     * TOKEN_MISTAKE(2202, "token错误"),
+     * UNAUTHORIZED(2002, "无权访问")
      * @param dto 数据包
      * @param request 请求
      * @return data为页信息
@@ -102,6 +131,10 @@ public class PostController {
     /**
      * 获取表白热度榜单
      * 获取帖子，以页码形式获取。输入包含页码和每页的数量，返回包含总页数。
+     * 可能的异常：
+     * TOKEN_EXP(2201, "token已过期"),
+     * TOKEN_MISTAKE(2202, "token错误"),
+     * UNAUTHORIZED(2002, "无权访问")
      * @param dto 数据包
      * @param request 请求
      * @return data为热度榜单
@@ -119,6 +152,10 @@ public class PostController {
     /**
      * 获取自己的表白
      * 获取帖子，以页码形式获取。输入包含页码和每页的数量，返回包含总页数。
+     * 可能的异常：
+     * TOKEN_EXP(2201, "token已过期"),
+     * TOKEN_MISTAKE(2202, "token错误"),
+     * UNAUTHORIZED(2002, "无权访问")
      * @param dto 数据包
      * @param request 请求
      * @return data为自己的表白
@@ -136,6 +173,11 @@ public class PostController {
     /**
      * 获取某一表白
      * 显示更详细的信息，包括评论情况。
+     * 可能的异常：
+     * POST_NOT_FOUND(404, "目标表白不存在"),
+     * TOKEN_EXP(2201, "token已过期"),
+     * TOKEN_MISTAKE(2202, "token错误"),
+     * UNAUTHORIZED(2002, "无权访问")
      * @param request 请求
      * @return data为自己的表白
      */
@@ -151,6 +193,12 @@ public class PostController {
 
     /**
      * 发布评论
+     * 可能的异常：
+     * POST_NOT_FOUND(404, "目标表白不存在"),
+     * TOKEN_EXP(2201, "token已过期"),
+     * TOKEN_MISTAKE(2202, "token错误"),
+     * UNAUTHORIZED(2002, "无权访问"),
+     * COMMENT_CONTENT_TOO_LONG(2801,"评论内容超过200字符"),
      * @param postId 回复帖子id
      * @param dto 数据包
      * @param request 请求
@@ -169,6 +217,12 @@ public class PostController {
 
     /**
      * 回复评论
+     * 可能的异常：
+     * COMMENT_NOT_FOUND(404, "目标评论不存在"),
+     * TOKEN_EXP(2201, "token已过期"),
+     * TOKEN_MISTAKE(2202, "token错误"),
+     * UNAUTHORIZED(2002, "无权访问"),
+     * COMMENT_CONTENT_TOO_LONG(2801,"评论内容超过200字符"),
      * @param commentId 回复评论id
      * @param dto 数据包
      * @param request 请求

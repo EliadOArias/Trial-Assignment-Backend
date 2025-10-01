@@ -38,6 +38,12 @@ public enum ExceptionEnum {
     BLACKLIST_DUPLICATED(2601,"拉黑目标为自己"),
     BLACKLIST_ADDED(2602,"用户已经被拉黑"),
     BLACKLIST_NOT_EXISTS(2603,"用户没有被拉黑"),
+    //Post
+    POST_CONTENT_TOO_LONG(2701,"表白内容超过200字符"),
+    POST_TITLE_TOO_LONG(2702,"表白标题超过50字符"),
+    POST_UPDATE_NOOP(2703,"无权限修改这个帖子，因为这个帖子不是你发布且你不是管理员"),
+    //Comment
+    COMMENT_CONTENT_TOO_LONG(2801,"评论内容超过200字符"),
 
     INVALID_PARAMETERS(2003, "参数错误");
 
