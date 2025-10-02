@@ -1,5 +1,6 @@
 package com.github.eliadoarias.tgb.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,11 +19,13 @@ public class PostGetRequest {
      * @titleName 页码
      * @example 0
      */
+    @NotNull
     private Integer page;
     /**
      * 此页帖子数量
      * @titleName 数量
      * @example 10
      */
+    @NotNull
     private Integer size;
 }

@@ -123,12 +123,6 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
 
     @Override
     public PostInfo send(PostCreateRequest dto, String userId) {
-        if (
-                Objects.isNull(dto.getContent())
-                        || Objects.isNull(dto.getTitle())
-        ) throw new ApiException(ExceptionEnum.INVALID_PARAMETERS);
-        if (dto.getContent().length()>200) throw new ApiException(ExceptionEnum.POST_CONTENT_TOO_LONG);
-        if (dto.getTitle().length()>50) throw new ApiException(ExceptionEnum.POST_TITLE_TOO_LONG);
         User user = userMapper.selectOne(
                 new  LambdaQueryWrapper<User>().eq(User::getUserId,userId)
         );
@@ -180,8 +174,6 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
     @Transactional
     @Override
     public PostInfo update(Integer confessionId, PostUpdateRequest dto, String userId) {
-        if (!Objects.isNull(dto.getContent())&&dto.getContent().length()>200) throw new ApiException(ExceptionEnum.POST_CONTENT_TOO_LONG);
-        if (!Objects.isNull(dto.getTitle())&&dto.getTitle().length()>50) throw new ApiException(ExceptionEnum.POST_TITLE_TOO_LONG);
         Confession confession = baseMapper.selectById(confessionId);
         User user = userMapper.selectOne(
                 new LambdaQueryWrapper<User>().eq(User::getUserId,userId)
@@ -307,10 +299,6 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
 
     @Override
     public CommentInfo sendComment(CommentRequest dto, Integer postId, String userId) {
-        if (
-                Objects.isNull(dto.getContent())
-        ) throw new ApiException(ExceptionEnum.INVALID_PARAMETERS);
-        if (dto.getContent().length()>200) throw new ApiException(ExceptionEnum.COMMENT_CONTENT_TOO_LONG);
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId,userId));
         Confession confession = baseMapper.selectById(postId);
         if (Objects.isNull(confession)) throw new ApiException(ExceptionEnum.POST_NOT_FOUND);
@@ -350,10 +338,6 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
 
     @Override
     public CommentInfo repliesComment(RepliesRequest dto, Integer commentId, String userId) {
-        if (
-                Objects.isNull(dto.getContent())
-        ) throw new ApiException(ExceptionEnum.INVALID_PARAMETERS);
-        if (dto.getContent().length()>200) throw new ApiException(ExceptionEnum.COMMENT_CONTENT_TOO_LONG);
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId,userId));
         Comment parentComment = commentMapper.selectById(commentId);
         if (Objects.isNull(parentComment)) throw new ApiException(ExceptionEnum.COMMENT_NOT_FOUND);

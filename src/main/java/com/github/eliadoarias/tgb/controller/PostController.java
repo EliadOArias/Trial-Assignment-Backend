@@ -5,6 +5,7 @@ import com.github.eliadoarias.tgb.result.AjaxResult;
 import com.github.eliadoarias.tgb.service.ConfessionService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -22,18 +23,17 @@ public class PostController {
     /**
      * 发布自己的表白
      * 可能的异常：
+     * INVALID_PARAMETERS(2003, "参数错误"),
      * TOKEN_EXP(2201, "token已过期"),
      * TOKEN_MISTAKE(2202, "token错误"),
      * UNAUTHORIZED(2002, "无权访问"),
-     * POST_CONTENT_TOO_LONG(2701,"表白内容超过200字符"),
-     * POST_TITLE_TOO_LONG(2702,"表白标题超过50字符")
      * @param dto 数据包
      * @return
      */
     @PreAuthorize("hasAuthority('permission:user.upload')")
     @PostMapping
     public AjaxResult<PostInfo> send(
-            @RequestBody PostCreateRequest dto,
+            @Valid @RequestBody PostCreateRequest dto,
             HttpServletRequest request
     ) {
         String userId = request.getAttribute("user_id").toString();
@@ -64,12 +64,11 @@ public class PostController {
     /**
      * 修改自己的表白
      * 可能的异常：
+     * INVALID_PARAMETERS(2003, "参数错误"),
      * POST_NOT_FOUND(404, "目标表白不存在"),
      * TOKEN_EXP(2201, "token已过期"),
      * TOKEN_MISTAKE(2202, "token错误"),
      * UNAUTHORIZED(2002, "无权访问"),
-     * POST_CONTENT_TOO_LONG(2701,"表白内容超过200字符"),
-     * POST_TITLE_TOO_LONG(2702,"表白标题超过50字符"),
      * POST_UPDATE_NOOP(2703,"无权限修改这个帖子，因为这个帖子不是你发布且你不是管理员")
      * @param confessionId 表白id
      * @return null
@@ -77,7 +76,7 @@ public class PostController {
     @PreAuthorize("hasAuthority('permission:user.upload')")
     @PutMapping("/{id}")
     public AjaxResult<PostInfo> update(
-            @PathVariable("id") Integer confessionId,
+            @Valid @PathVariable("id") Integer confessionId,
             @RequestBody PostUpdateRequest dto,
             HttpServletRequest request
     ) {
@@ -111,6 +110,7 @@ public class PostController {
      * 获取表白列表
      * 获取帖子，以页码形式获取。输入包含页码和每页的数量，返回包含总页数。
      * 可能的异常：
+     * INVALID_PARAMETERS(2003, "参数错误"),
      * TOKEN_EXP(2201, "token已过期"),
      * TOKEN_MISTAKE(2202, "token错误"),
      * UNAUTHORIZED(2002, "无权访问")
@@ -121,7 +121,7 @@ public class PostController {
     @PreAuthorize("hasAuthority('permission:user.read')")
     @GetMapping
     public AjaxResult<PageInfo> getList(
-            @RequestBody PostGetRequest dto,
+            @Valid @RequestBody PostGetRequest dto,
             HttpServletRequest request
     ) {
         String userId = request.getAttribute("user_id").toString();
@@ -132,6 +132,7 @@ public class PostController {
      * 获取表白热度榜单
      * 获取帖子，以页码形式获取。输入包含页码和每页的数量，返回包含总页数。
      * 可能的异常：
+     * INVALID_PARAMETERS(2003, "参数错误"),
      * TOKEN_EXP(2201, "token已过期"),
      * TOKEN_MISTAKE(2202, "token错误"),
      * UNAUTHORIZED(2002, "无权访问")
@@ -142,7 +143,7 @@ public class PostController {
     @PreAuthorize("hasAuthority('permission:user.read')")
     @GetMapping("/hot")
     public AjaxResult<PageInfo> getHotList(
-            @RequestBody PostGetRequest dto,
+            @Valid @RequestBody PostGetRequest dto,
             HttpServletRequest request
     ) {
         String userId = request.getAttribute("user_id").toString();
@@ -153,6 +154,7 @@ public class PostController {
      * 获取自己的表白
      * 获取帖子，以页码形式获取。输入包含页码和每页的数量，返回包含总页数。
      * 可能的异常：
+     * INVALID_PARAMETERS(2003, "参数错误"),
      * TOKEN_EXP(2201, "token已过期"),
      * TOKEN_MISTAKE(2202, "token错误"),
      * UNAUTHORIZED(2002, "无权访问")
@@ -163,7 +165,7 @@ public class PostController {
     @PreAuthorize("hasAuthority('permission:user.read')")
     @GetMapping("/my")
     public AjaxResult<PageInfo> getMyList(
-            @RequestBody PostGetRequest dto,
+            @Valid @RequestBody PostGetRequest dto,
             HttpServletRequest request
     ) {
         String userId = request.getAttribute("user_id").toString();
@@ -194,11 +196,11 @@ public class PostController {
     /**
      * 发布评论
      * 可能的异常：
+     * INVALID_PARAMETERS(2003, "参数错误"),
      * POST_NOT_FOUND(404, "目标表白不存在"),
      * TOKEN_EXP(2201, "token已过期"),
      * TOKEN_MISTAKE(2202, "token错误"),
-     * UNAUTHORIZED(2002, "无权访问"),
-     * COMMENT_CONTENT_TOO_LONG(2801,"评论内容超过200字符"),
+     * UNAUTHORIZED(2002, "无权访问")
      * @param postId 回复帖子id
      * @param dto 数据包
      * @param request 请求
@@ -208,7 +210,7 @@ public class PostController {
     @PostMapping("/{id}/comments")
     public AjaxResult<CommentInfo> comment(
             @PathVariable("id") Integer postId,
-            @RequestBody CommentRequest dto,
+            @Valid @RequestBody CommentRequest dto,
             HttpServletRequest request
     ) {
         String userId = request.getAttribute("user_id").toString();
@@ -218,11 +220,11 @@ public class PostController {
     /**
      * 回复评论
      * 可能的异常：
+     * INVALID_PARAMETERS(2003, "参数错误"),
      * COMMENT_NOT_FOUND(404, "目标评论不存在"),
      * TOKEN_EXP(2201, "token已过期"),
      * TOKEN_MISTAKE(2202, "token错误"),
-     * UNAUTHORIZED(2002, "无权访问"),
-     * COMMENT_CONTENT_TOO_LONG(2801,"评论内容超过200字符"),
+     * UNAUTHORIZED(2002, "无权访问")
      * @param commentId 回复评论id
      * @param dto 数据包
      * @param request 请求
@@ -231,7 +233,7 @@ public class PostController {
     @PreAuthorize("hasAuthority('permission:user.read')")
     @PostMapping("/{id}/replies")
     public AjaxResult<CommentInfo> replies(
-            @PathVariable("id") Integer commentId,
+            @Valid @PathVariable("id") Integer commentId,
             @RequestBody RepliesRequest dto,
             HttpServletRequest request
     ) {

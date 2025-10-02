@@ -1,6 +1,8 @@
 package com.github.eliadoarias.tgb.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +19,8 @@ public class FileInfo {
      * @titleName 文件url
      * @mock http://localhost:8080/resources/image/@word().png
      */
-    private
-    @JsonProperty("file_url") String fileUrl;
+    @JsonProperty("file_url")
+    @NotBlank
+    @NotNull
+    private String fileUrl;
 }

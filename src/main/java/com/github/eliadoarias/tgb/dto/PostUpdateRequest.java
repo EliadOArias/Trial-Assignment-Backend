@@ -1,5 +1,7 @@
 package com.github.eliadoarias.tgb.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,6 +20,8 @@ public class PostUpdateRequest {
      * @titleName 标题
      * @example I love money
      */
+    @Size(min=1,max=50)
+    @NotBlank
     private String title;
 
     /**
@@ -25,12 +29,15 @@ public class PostUpdateRequest {
      * @titleName 内容
      * @example Money is beautiful and kind.
      */
+    @Size(min=1,max=200)
+    @NotBlank
     private String content;
 
     /**
      * 一组图片的url
      * @titleName 图片列表
      */
+    @Size(min=0,max=9)
     private List<String> photos;
 
     /**
