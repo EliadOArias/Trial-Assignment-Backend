@@ -27,7 +27,7 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        log.info("WHY NOT DO THIS???");
+        log.info("handle exception");
         try {
             filterChain.doFilter(request, response);
         }

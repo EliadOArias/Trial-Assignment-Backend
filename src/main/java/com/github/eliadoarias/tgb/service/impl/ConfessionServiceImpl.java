@@ -15,6 +15,8 @@ import com.github.eliadoarias.tgb.util.ImageStorageUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,12 +54,19 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
     private CommentMapper commentMapper;
 
     @Resource
+    private DataSourceProperties dataSourceProperties;
+
+    @Resource
     private UserService userService;
     @Autowired
     private ImageStorageUtil imageStorageUtil;
+    @Resource
+    private Environment environment;
 
     @Scheduled(fixedRate = 6000)
     public void trySend() {
+        //log.info("Try connect {} in {} profile",dataSourceProperties.getUrl(),String.join(",", environment.getActiveProfiles()));
+
         List<SendJob> sendJobs = sendJobMapper.selectList(
                 new LambdaQueryWrapper<SendJob>()
                         .orderByAsc(SendJob::getSendTime)
@@ -84,7 +93,7 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
                 new LambdaQueryWrapper<Likes>().eq(Likes::getPostId, postId).eq(Likes::getUserId, user.getId())
         );
         List<String> photoAbsoluteUrls = new ArrayList<>();
-        for (String photo : confession.getPhotos().split(",")){
+        if(!confession.getPhotos().isEmpty()) for (String photo : confession.getPhotos().split(",")){
             photoAbsoluteUrls.add(imageStorageUtil.buildUrl(photo));
         }
         PostInfo postInfo = PostInfo.of(confession);
@@ -93,7 +102,7 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
         if(!confession.isAnonymous()) {
             postInfo.setPosterName(user.getUsername());
             postInfo.setName(user.getName());
-            postInfo.setAvatar(user.getAvatar());
+            postInfo.setAvatar(imageStorageUtil.buildUrl(user.getAvatar()));
         }else {
             postInfo.setAvatar(imageStorageUtil.buildUrl("default.ico"));
         }
@@ -108,12 +117,17 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
         Likes likes = likesMapper.selectOne(
                 new LambdaQueryWrapper<Likes>().eq(Likes::getPostId, postId).eq(Likes::getUserId, user.getId())
         );
+        List<String> photoAbsoluteUrls = new ArrayList<>();
+        if(!confession.getPhotos().isEmpty()) for (String photo : confession.getPhotos().split(",")){
+            photoAbsoluteUrls.add(imageStorageUtil.buildUrl(photo));
+        }
         PostDetailInfo postDetailInfo = PostDetailInfo.of(confession);
         postDetailInfo.setLiked(Objects.isNull(likes));
+        postDetailInfo.setPhotos(photoAbsoluteUrls);
         if(!confession.isAnonymous()) {
             postDetailInfo.setPosterName(user.getUsername());
             postDetailInfo.setName(user.getName());
-            postDetailInfo.setAvatar(user.getAvatar());
+            postDetailInfo.setAvatar(imageStorageUtil.buildUrl(user.getAvatar()));
         }else {
             postDetailInfo.setAvatar(imageStorageUtil.buildUrl("default.ico"));
         }
