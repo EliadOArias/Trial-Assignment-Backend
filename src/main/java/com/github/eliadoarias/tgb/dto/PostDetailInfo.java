@@ -101,7 +101,7 @@ public class PostDetailInfo {
      * 此贴的评论列表，每个评论包含索引
      * @titleName 评论列表
      */
-    private List<Comment> comments;
+    private List<CommentInfo> comments;
 
     /**
      * 没有设定部分变量！

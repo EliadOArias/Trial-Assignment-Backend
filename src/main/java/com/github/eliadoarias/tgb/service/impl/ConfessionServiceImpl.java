@@ -75,6 +75,10 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
             if (sendJob.getSendTime().isBefore(LocalDateTime.now())) {
                 log.info("send {}", sendJob.getSendId());
                 Confession confession = baseMapper.selectById(sendJob.getSendId());
+                if (Objects.isNull(confession)){
+                    sendJobMapper.deleteById(sendJob.getId());
+                    continue;
+                }
                 confession.setUnsent(false);
                 baseMapper.updateById(confession);
                 sendJobMapper.deleteById(sendJob.getId());
@@ -87,6 +91,31 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
     private PostInfo createPostInfo(Confession confession, String userId) {
         User user = userMapper.selectOne(
                 new LambdaQueryWrapper<User>().eq(User::getUserId, userId)
+        );
+        Integer postId = confession.getId();
+        Likes likes = likesMapper.selectOne(
+                new LambdaQueryWrapper<Likes>().eq(Likes::getPostId, postId).eq(Likes::getUserId, user.getId())
+        );
+        List<String> photoAbsoluteUrls = new ArrayList<>();
+        if(!confession.getPhotos().isEmpty()) for (String photo : confession.getPhotos().split(",")){
+            photoAbsoluteUrls.add(imageStorageUtil.buildUrl(photo));
+        }
+        PostInfo postInfo = PostInfo.of(confession);
+        postInfo.setLiked(Objects.isNull(likes));
+        postInfo.setPhotos(photoAbsoluteUrls);
+        if(!confession.isAnonymous()) {
+            postInfo.setPosterName(user.getUsername());
+            postInfo.setName(user.getName());
+            postInfo.setAvatar(imageStorageUtil.buildUrl(user.getAvatar()));
+        }else {
+            postInfo.setAvatar(imageStorageUtil.buildUrl("default.ico"));
+        }
+        return postInfo;
+    }
+
+    private PostInfo createPostInfo(Confession confession, Integer userId) {
+        User user = userMapper.selectOne(
+                new LambdaQueryWrapper<User>().eq(User::getId, userId)
         );
         Integer postId = confession.getId();
         Likes likes = likesMapper.selectOne(
@@ -252,7 +281,7 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
     private PageInfo getPageInfo(String userId, Page<Confession> result) {
         List<PostInfo> postInfos = new ArrayList<>();
         for(Confession confession: result.getRecords()){
-            postInfos.add(createPostInfo(confession, userId));
+            postInfos.add(createPostInfo(confession, confession.getPosterId()));
         }
         return PageInfo.builder()
                 .posts(postInfos)
@@ -287,9 +316,16 @@ public class ConfessionServiceImpl extends ServiceImpl<ConfessionMapper, Confess
                 new LambdaQueryWrapper<Comment>()
                         .eq(Comment::getPostId,confessionId)
         );
+        List<CommentInfo> commentInfos = new ArrayList<>();
+        for (Comment comment:comments){
+            CommentInfo commentInfo = CommentInfo.of(comment);
+            User commentUser = userMapper.selectById(comment.getUserId());
+            commentInfo.setUsername(commentUser.getUsername());
+            commentInfos.add(commentInfo);
+        }
         confession.setViews(confession.getViews() + 1);
         baseMapper.updateById(confession);
-        postDetailInfo.setComments(List.copyOf(comments));
+        postDetailInfo.setComments(commentInfos);
         return postDetailInfo;
     }
 

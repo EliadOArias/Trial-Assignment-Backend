@@ -51,6 +51,7 @@ public class CommentInfo {
      * @titleName 父评论id
      * @example 1
      */
+    @JsonProperty("parent_id")
     private Integer parentId;
 
     /**
@@ -58,6 +59,7 @@ public class CommentInfo {
      * @titleName 根评论id
      * @example 1
      */
+    @JsonProperty("root_id")
     private Integer rootId;
 
     /**

@@ -186,12 +186,13 @@ public class UserController {
      * INVALID_PARAMETERS(2003, "参数错误"),
      * TOKEN_EXP(2201, "token已过期"),
      * TOKEN_MISTAKE(2202, "token错误")
+     * @param refreshToken 刷新token
      * @return 无
      */
     @GetMapping("/refresh-token")
     public AjaxResult<TokenInfo> refreshToken(
-            @Valid @RequestBody RefreshRequest dto
+            @RequestParam("refresh-token") String refreshToken
     ) {
-        return AjaxResult.success(userService.refresh(dto.getRefreshToken()));
+        return AjaxResult.success(userService.refresh(refreshToken));
     }
 }

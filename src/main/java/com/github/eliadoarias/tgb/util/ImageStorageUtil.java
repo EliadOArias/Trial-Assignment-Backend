@@ -4,6 +4,7 @@ import com.github.eliadoarias.tgb.config.PathConfig;
 import com.github.eliadoarias.tgb.constant.ExceptionEnum;
 import com.github.eliadoarias.tgb.exception.ApiException;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 @Component
+@Slf4j
 public class ImageStorageUtil {
     @Resource
     PathConfig pathConfig;
@@ -42,7 +44,8 @@ public class ImageStorageUtil {
         String newName = UUID.randomUUID().toString() +
                 fileName.substring(fileName.lastIndexOf("."));
         File newFile = new File(getImageFolderPath()+newName);
-        file.transferTo(newFile);
+        log.info("Saving image to "+newFile.getAbsolutePath());
+        file.transferTo(newFile.getAbsoluteFile());
         return newFile;
     }
 }

@@ -114,18 +114,20 @@ public class PostController {
      * TOKEN_EXP(2201, "token已过期"),
      * TOKEN_MISTAKE(2202, "token错误"),
      * UNAUTHORIZED(2002, "无权访问")
-     * @param dto 数据包
+     * @param page 页码
+     * @param size 每页帖子数量
      * @param request 请求
      * @return data为页信息
      */
     @PreAuthorize("hasAuthority('permission:user.read')")
     @GetMapping
     public AjaxResult<PageInfo> getList(
-            @Valid @RequestBody PostGetRequest dto,
+            @RequestParam("page") Integer page,
+            @RequestParam("size") Integer size,
             HttpServletRequest request
     ) {
         String userId = request.getAttribute("user_id").toString();
-        return AjaxResult.success(confessionService.getList(dto.getPage(), dto.getSize(), userId));
+        return AjaxResult.success(confessionService.getList(page, size, userId));
     }
 
     /**
@@ -136,18 +138,20 @@ public class PostController {
      * TOKEN_EXP(2201, "token已过期"),
      * TOKEN_MISTAKE(2202, "token错误"),
      * UNAUTHORIZED(2002, "无权访问")
-     * @param dto 数据包
+     * @param page 页码
+     * @param size 每页帖子数量
      * @param request 请求
      * @return data为热度榜单
      */
     @PreAuthorize("hasAuthority('permission:user.read')")
     @GetMapping("/hot")
     public AjaxResult<PageInfo> getHotList(
-            @Valid @RequestBody PostGetRequest dto,
+            @RequestParam("page") Integer page,
+            @RequestParam("size") Integer size,
             HttpServletRequest request
     ) {
         String userId = request.getAttribute("user_id").toString();
-        return AjaxResult.success(confessionService.getHotList(dto.getPage(), dto.getSize(), userId));
+        return AjaxResult.success(confessionService.getHotList(page, size, userId));
     }
 
     /**
@@ -158,18 +162,20 @@ public class PostController {
      * TOKEN_EXP(2201, "token已过期"),
      * TOKEN_MISTAKE(2202, "token错误"),
      * UNAUTHORIZED(2002, "无权访问")
-     * @param dto 数据包
+     * @param page 页码
+     * @param size 每页帖子数量
      * @param request 请求
      * @return data为自己的表白
      */
     @PreAuthorize("hasAuthority('permission:user.read')")
     @GetMapping("/my")
     public AjaxResult<PageInfo> getMyList(
-            @Valid @RequestBody PostGetRequest dto,
+            @RequestParam("page") Integer page,
+            @RequestParam("size") Integer size,
             HttpServletRequest request
     ) {
         String userId = request.getAttribute("user_id").toString();
-        return AjaxResult.success(confessionService.getHotList(dto.getPage(), dto.getSize(), userId));
+        return AjaxResult.success(confessionService.getMyList(page, size, userId));
     }
 
     /**
